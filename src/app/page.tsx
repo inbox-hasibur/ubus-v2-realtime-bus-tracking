@@ -5,6 +5,7 @@ import { Bus, MapPin, Clock, Calendar, Bell, Settings, Target, Menu, Navigation2
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import BusSchedule from "@/components/BusSchedule";
+import ClassSchedule from "@/components/ClassSchedule";
 
 
 const MapView = dynamic(() => import("@/components/Map"), { 
@@ -82,8 +83,7 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* --- Main Area --- */}
-      {/* --- Main Area --- */}
+{/* --- Main Area --- */}
       <main className="flex-1 relative flex flex-col">
         
         {activeTab === "dashboard" ? (
@@ -151,8 +151,12 @@ export default function Dashboard() {
             </div>
           </>
         ) : activeTab === "schedule" ? (
-          <div className="z-10 h-full w-full p-8 overflow-auto bg-white/50 backdrop-blur-md">
+          <div className="z-10 h-full w-full p-8 overflow-auto bg-white/80 backdrop-blur-xl">
              <BusSchedule />
+          </div>
+        ) : activeTab === "class" ? (
+          <div className="z-10 h-full w-full p-8 overflow-auto bg-white/80 backdrop-blur-xl">
+             <ClassSchedule />
           </div>
         ) : (
           <div className="z-10 flex items-center justify-center h-full text-slate-400 font-bold uppercase tracking-widest text-xs">
