@@ -1,5 +1,5 @@
 # 🚌 UBUS V2 - Real-Time University Bus Tracking System
-
+### 📍 URL: https://bus-iubat.vercel.app/
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
 ![Supabase](https://img.shields.io/badge/Supabase-Realtime-green?style=for-the-badge&logo=supabase)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-blue?style=for-the-badge&logo=tailwind-css)
