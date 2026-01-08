@@ -45,35 +45,43 @@ export default function Map() {
     });
   };
 
+// Fetch bus locations from Supabase
   const fetchLocations = async () => {
-    const { data, error } = await supabase
-      .from('bus_locations')
-      .select(`
-        latitude, 
-        longitude, 
-        speed,
-        buses (bus_no, route_name)
-      `);
+    try {
+      const { data, error } = await supabase
+        .from('bus_locations')
+        .select(`
+          latitude, 
+          longitude, 
+          speed,
+          buses (bus_no, route_name)
+        `);
 
-    if (!error && data) {
-      setBusLocations(data);
+      if (error) throw error;
+      if (data) setBusLocations(data);
+    } catch (err) {
+      console.error("Error fetching locations:", err);
     }
   };
 
   useEffect(() => {
+    // Initial fetch
     fetchLocations();
 
-    const subscription = supabase
-      .channel('bus-updates')
+    // Setup Real-time subscription
+    const channel = supabase
+      .channel('realtime_bus_map')
       .on(
         'postgres_changes', 
-        { event: 'UPDATE', schema: 'public', table: 'bus_locations' }, 
-        () => fetchLocations()
+        { event: '*', schema: 'public', table: 'bus_locations' }, 
+        () => {
+          fetchLocations();
+        }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(channel);
     };
   }, []);
 
