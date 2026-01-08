@@ -10,3 +10,16 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Bus Marker Styles */
+.bus-marker-badge {
+  @apply w-9 h-9 flex items-center justify-center rounded-full bg-yellow-300 text-slate-900 font-black text-sm border border-black/50 shadow-sm;
+}
+
+.bus-marker-pointer {
+  @apply w-0 h-0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #facc15;
+  margin-top: -4px;
+}

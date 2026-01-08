@@ -136,13 +136,17 @@ export default function Dashboard() {
                 <span className={`overflow-hidden transition-all duration-300 hidden md:block ${isRightPanelOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>Track Near Me</span>
               </button>
               
-              {/* Menu Toggle Button */}
+              {/* Menu Toggle Button - Updated to match Dark Badges when closed */}
               <button 
                 onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
-                className={`h-9 w-9 md:h-11 md:w-11 flex items-center justify-center rounded-xl md:rounded-2xl shadow-xl border transition-all active:scale-95 ${!isRightPanelOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white/80 backdrop-blur-md border-white/60 text-slate-900'}`}
+                className={`h-9 w-9 md:h-11 md:w-11 flex items-center justify-center rounded-xl md:rounded-2xl shadow-xl border transition-all active:scale-95 
+                ${!isRightPanelOpen 
+                  ? 'bg-slate-900/90 backdrop-blur-md text-white border-white/10' 
+                  : 'bg-white/80 backdrop-blur-md border-white/60 text-slate-900'}`}
               >
                 <Menu className="w-4 h-4 md:w-5 md:h-5" />
               </button>
+
             </div>
 
             {/* --- Right Panel Component --- */}

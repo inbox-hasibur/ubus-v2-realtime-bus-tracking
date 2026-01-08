@@ -44,14 +44,18 @@ export default function Map() {
 
   // Memoized function to create bus icon with HTML template
   const createBusIcon = useCallback((busNo: string) => {
+    // Format bus number to show only last two digits (prefer digits from string)
+    const digits = (busNo || "").toString().replace(/\D+/g, "");
+    const display = digits ? digits.slice(-2) : (busNo || "").toString().slice(-2);
+
     return L.divIcon({
       className: "custom-bus-marker",
       html: `
         <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
-          <div style="background-color: #1e293b; color: #f8fafc; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 13px; border: 2px solid #3b82f6; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); white-space: nowrap; font-family: sans-serif; letter-spacing: 0.5px;">
-            ${busNo}
+          <div class="bus-marker-badge">
+            ${display}
           </div>
-          <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid #3b82f6; margin-top: -1px;"></div>
+          <div class="bus-marker-pointer"></div>
         </div>
       `,
       iconSize: [40, 40],
@@ -104,7 +108,7 @@ export default function Map() {
   }, [isClient, trackMe, fetchLocations]);
 
   // Memoized markers to prevent unnecessary re-renders
-  const markers = useMemo(() => busLocations.map((loc, index) => (
+  const markers = useMemo(() => busLocations.slice(0, 3).map((loc, index) => (
     <Marker 
       key={`${loc.latitude}-${loc.longitude}-${index}`}
       position={[loc.latitude, loc.longitude]} 
