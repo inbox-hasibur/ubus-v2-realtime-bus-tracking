@@ -8,7 +8,6 @@ import ClassSchedule from "@/components/ClassSchedule";
 import Sidebar from "@/components/Sidebar";
 import RightPanel from "@/components/RightPanel";
 
-// Dynamic Map Import
 const MapView = dynamic(() => import("@/components/Map"), { 
   ssr: false,
   loading: () => <div className="h-full w-full bg-slate-200 animate-pulse" />
@@ -20,10 +19,11 @@ export default function Dashboard() {
   const [currentDate, setCurrentDate] = useState("");
   
   // UI States
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Mobile first: Start collapsed
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);    // Mobile first: Start closed
 
   useEffect(() => {
+    // Clock Logic
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }));
@@ -31,6 +31,21 @@ export default function Dashboard() {
     };
     updateTime();
     const interval = setInterval(updateTime, 60000);
+
+    // Responsive Logic: Open panels automatically only on Desktop
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarCollapsed(false);
+        setIsRightPanelOpen(true);
+      } else {
+        setIsSidebarCollapsed(true);
+        setIsRightPanelOpen(false);
+      }
+    };
+
+    // Set initial state based on screen size
+    handleResize();
+
     return () => clearInterval(interval);
   }, []);
 
@@ -54,28 +69,31 @@ export default function Dashboard() {
               <MapView />
             </div>
 
-            {/* Top Overlay Badges */}
-            <div className="absolute top-6 left-6 flex gap-2 z-10 transition-all duration-300">
-              <div className="bg-slate-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl font-bold text-[12px] shadow-2xl flex items-center gap-2 border border-white/10">
-                <Clock className="w-3.5 h-3.5 text-blue-400" /> {currentTime}
+            {/* Top Overlay Badges (Time & Date) */}
+            <div className="absolute top-4 left-4 md:top-6 md:left-6 flex gap-2 z-10 transition-all duration-300">
+              <div className="bg-slate-900/90 backdrop-blur-md text-white px-3 py-2 md:px-4 md:py-2.5 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-[12px] shadow-2xl flex items-center gap-2 border border-white/10">
+                <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-blue-400" /> {currentTime}
               </div>
-              <div className="bg-slate-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl font-bold text-[12px] shadow-2xl border border-white/10 hidden sm:block">
+              <div className="bg-slate-900/90 backdrop-blur-md text-white px-3 py-2 md:px-4 md:py-2.5 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-[12px] shadow-2xl border border-white/10 hidden sm:block">
                 {currentDate}
               </div>
             </div>
 
-            {/* Top Right Actions */}
-            <div className="absolute top-6 right-6 flex gap-3 z-20">
-              <button className={`bg-[#facc15] hover:bg-[#eab308] text-slate-900 h-11 rounded-2xl font-black text-[11px] uppercase shadow-xl transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 border border-yellow-400/50 ${isRightPanelOpen ? 'px-6' : 'w-11 px-0'}`}>
-                <Target className="shrink-0 w-4 h-4" />
-                <span className={`overflow-hidden transition-all duration-300 ${isRightPanelOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>Track Near Me</span>
+            {/* Top Right Actions (Hamburger & Track) */}
+            <div className="absolute top-4 right-4 md:top-6 md:right-6 flex gap-2 md:gap-3 z-20">
+              
+              {/* Track Me Button - Hides text on mobile to save space */}
+              <button className={`bg-[#facc15] hover:bg-[#eab308] text-slate-900 h-9 md:h-11 rounded-xl md:rounded-2xl font-black text-[10px] md:text-[11px] uppercase shadow-xl transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 border border-yellow-400/50 ${isRightPanelOpen ? 'px-4 md:px-6' : 'w-9 md:w-11 px-0'}`}>
+                <Target className="shrink-0 w-3.5 h-3.5 md:w-4 md:h-4" />
+                <span className={`overflow-hidden transition-all duration-300 hidden md:block ${isRightPanelOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>Track Near Me</span>
               </button>
               
+              {/* Menu Toggle Button */}
               <button 
                 onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
-                className={`h-11 w-11 flex items-center justify-center rounded-2xl shadow-xl border transition-all active:scale-95 ${!isRightPanelOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white/80 backdrop-blur-md border-white/60 text-slate-900'}`}
+                className={`h-9 w-9 md:h-11 md:w-11 flex items-center justify-center rounded-xl md:rounded-2xl shadow-xl border transition-all active:scale-95 ${!isRightPanelOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white/80 backdrop-blur-md border-white/60 text-slate-900'}`}
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             </div>
 
@@ -83,7 +101,7 @@ export default function Dashboard() {
             <RightPanel isOpen={isRightPanelOpen} />
           </>
         ) : (
-          <div className="z-10 h-full w-full p-4 lg:p-8 overflow-auto bg-white/50 backdrop-blur-md">
+          <div className="z-10 h-full w-full p-0 md:p-4 lg:p-8 overflow-auto bg-white/50 backdrop-blur-md">
             {activeTab === "schedule" ? <BusSchedule /> : activeTab === "class" ? <ClassSchedule /> : 
               <div className="flex items-center justify-center h-full text-slate-400 font-bold uppercase tracking-widest text-xs">Settings Coming Soon</div>
             }

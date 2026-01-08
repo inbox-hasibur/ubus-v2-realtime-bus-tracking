@@ -5,8 +5,7 @@ import { PanelCard, InfoBlock } from "@/components/DashboardUI";
 
 export default function RightPanel({ isOpen }: { isOpen: boolean }) {
   return (
-    <div className={`absolute top-20 right-4 md:right-6 w-full md:w-[360px] space-y-4 z-10 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) 
-      ${isOpen ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0 pointer-events-none'}`}>
+    <div className={`absolute top-16 right-4 left-4 md:left-auto md:top-24 md:right-6 w-auto md:w-[320px] space-y-3 md:space-y-4 z-10 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) ${isOpen ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0 pointer-events-none'}`}>
       
       {/* High Contrast Cards */}
       <PanelCard title="Estimated time">

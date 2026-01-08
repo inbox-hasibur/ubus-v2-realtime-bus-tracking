@@ -38,69 +38,69 @@ export default function BusSchedule() {
   if (loading) {
     return (
       <div className="p-10 text-center font-bold animate-pulse text-slate-400 uppercase text-[10px] tracking-widest">
-        Loading Live Schedules...
+        Loading...
       </div>
     );
   }
 
   return (
-    <div className="p-6 h-full flex flex-col font-sans">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+    <div className="p-4 h-full flex flex-col font-sans">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter">
           Bus Timetable
         </h2>
 
-        <div className="relative w-72">
+        <div className="relative w-full md:w-64">
           <input
             type="text"
-            placeholder="Search Route or Destination..."
-            className="w-full bg-white border border-slate-200 text-xs p-4 pl-12 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm"
+            placeholder="Search..."
+            className="w-full bg-white border border-slate-200 text-[11px] p-3 pl-9 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/10 transition-all shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-4" />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3.5" />
         </div>
       </div>
 
-      <div className="grid gap-4 overflow-y-auto pr-2">
+      <div className="grid gap-3 overflow-y-auto pr-1 custom-scrollbar">
         {filteredSchedule.map((bus) => (
           <div
             key={bus.id}
-            className="bg-white/80 backdrop-blur-sm p-5 rounded-[28px] border border-white shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all group cursor-default"
+            className="bg-white/90 backdrop-blur-sm p-3 rounded-[20px] border border-white shadow-sm flex items-center justify-between hover:scale-[1.01] transition-all group cursor-default"
           >
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 bg-slate-100 rounded-[20px] flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-inner">
-                <Bus className="w-6 h-6" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-slate-100 rounded-[14px] flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                <Bus className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-sm font-black text-slate-800 tracking-tight">
+                <p className="text-xs font-black text-slate-800 tracking-tight">
                   {bus.route_name}
                 </p>
-                <div className="flex items-center gap-3 mt-1.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                     To: {bus.destination}
                   </span>
-                  <span className="text-[9px] px-2.5 py-1 rounded-full font-black uppercase tracking-tighter bg-green-100 text-green-600">
+                  <span className="text-[8px] px-2 py-0.5 rounded-md font-black uppercase tracking-tighter bg-green-100 text-green-600 ml-2 hidden sm:inline-block">
                     Active
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="flex items-center gap-1.5 text-blue-600 justify-end">
-                  <Clock className="w-3.5 h-3.5" />
-                  <p className="text-base font-black tracking-tighter">
+                <div className="flex items-center gap-1 text-blue-600 justify-end">
+                  <Clock className="w-3 h-3" />
+                  <p className="text-xs font-black tracking-tighter">
                     {bus.departure_time}
                   </p>
                 </div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                  Scheduled Departure
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 hidden sm:block">
+                  Departure
                 </p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-2xl text-slate-300 group-hover:text-blue-500 group-hover:bg-blue-50 transition-all">
-                <ArrowRight className="w-5 h-5" />
+              <div className="p-2 bg-slate-50 rounded-xl text-slate-300 group-hover:text-blue-500 group-hover:bg-blue-50 transition-all">
+                <ArrowRight className="w-4 h-4" />
               </div>
             </div>
           </div>
@@ -108,7 +108,7 @@ export default function BusSchedule() {
 
         {filteredSchedule.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">
               No schedules found
             </p>
           </div>
