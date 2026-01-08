@@ -62,7 +62,7 @@ export default function Dashboard() {
               onClick={() => setActiveTab("class")}
             />
             <NavItem 
-              icon={<Settings className="w-5 h-5" />} f
+              icon={<Settings className="w-5 h-5" />}
               label="Settings" 
               active={activeTab === "settings"} 
               onClick={() => setActiveTab("settings")}
