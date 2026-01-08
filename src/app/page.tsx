@@ -19,9 +19,30 @@ export default function Dashboard() {
   const [currentDate, setCurrentDate] = useState("");
   
   // UI States
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Mobile first: Start collapsed
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);    // Mobile first: Start closed
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<string | null>(null);
+
+  // Navigation States
+  const [startPoint, setStartPoint] = useState("");
+  const [destination, setDestination] = useState("");
+  const [journeyInfo, setJourneyInfo] = useState({
+    currentLocation: "Waiting for input...",
+    nextStop: "Not started",
+    finalDestination: "IUBAT University",
+    eta: "00:00 M"
+  });
+
+  const handleStartNavigation = () => {
+    // Logic to simulate navigation start
+    setJourneyInfo({
+      currentLocation: startPoint || "User Location",
+      nextStop: "Processing...",
+      finalDestination: destination || "IUBAT University",
+      eta: "15:00 M" // Mock ETA
+    });
+    alert("Navigation Started to " + (destination || "IUBAT"));
+  };
 
   useEffect(() => {
     // Clock Logic
@@ -125,7 +146,16 @@ export default function Dashboard() {
             </div>
 
             {/* --- Right Panel Component --- */}
-            <RightPanel isOpen={isRightPanelOpen} currentLocation={currentLocation} />
+            <RightPanel 
+              isOpen={isRightPanelOpen} 
+              currentLocation={currentLocation}
+              startPoint={startPoint}
+              setStartPoint={setStartPoint}
+              destination={destination}
+              setDestination={setDestination}
+              journeyInfo={journeyInfo}
+              onStart={handleStartNavigation}
+            />
           </>
         ) : (
           <div className="z-10 h-full w-full p-0 md:p-4 lg:p-8 overflow-auto bg-white/50 backdrop-blur-md">

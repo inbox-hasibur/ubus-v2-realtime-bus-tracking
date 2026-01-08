@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvent, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
@@ -127,15 +127,37 @@ export default function Map() {
     return <div className="h-full w-full bg-slate-200 animate-pulse" />;
   }
 
+  // Helper component to capture map instance inside MapContainer
+  const MapInstanceHelper = () => {
+    const map = useRef<any>(null);
+    const mapContext = useMapEvent('load', () => {
+      if (mapContext) {
+        mapInstanceRef.current = mapContext;
+      }
+    });
+    
+    // Alternative: use useMap hook if available
+    try {
+      const mapInstance = useMap?.();
+      if (mapInstance && !mapInstanceRef.current) {
+        mapInstanceRef.current = mapInstance;
+      }
+    } catch (err) {
+      // useMap might not be available, use mapContext instead
+    }
+
+    return null;
+  };
+
   return (
     <div className="h-full w-full">
       <MapContainer
-        whenCreated={(map) => (mapInstanceRef.current = map)}
         center={[23.8759, 90.3795]}
         zoom={16}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <MapInstanceHelper />
         {markers}
       </MapContainer>
     </div>
