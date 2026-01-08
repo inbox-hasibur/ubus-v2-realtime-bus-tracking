@@ -3,11 +3,13 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function Map() {
   const [busLocations, setBusLocations] = useState<any[]>([]);
+  const [isClient, setIsClient] = useState(false);
+  const mapInstanceRef = useRef<any>(null);
 
   // Optimized Custom Marker UI
   const createBusIcon = (busNo: string) => {
@@ -40,12 +42,12 @@ export default function Map() {
           "></div>
         </div>
       `,
-      iconSize: [40, 40], // Defined size to prevent clipping
-      iconAnchor: [20, 40], // Anchors the bottom tip of the triangle to the coordinates
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
     });
   };
 
-// Fetch bus locations from Supabase
+  // Fetch bus locations from Supabase
   const fetchLocations = async () => {
     try {
       const { data, error } = await supabase
@@ -64,7 +66,15 @@ export default function Map() {
     }
   };
 
+  // Ensure component renders only on client side
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Setup real-time subscription
+  useEffect(() => {
+    if (!isClient) return;
+
     // Initial fetch
     fetchLocations();
 
@@ -83,30 +93,36 @@ export default function Map() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [isClient]);
+
+  // Prevent rendering on server
+  if (!isClient) {
+    return <div className="h-full w-full bg-slate-200 animate-pulse" />;
+  }
 
   return (
     <div className="h-full w-full">
       <MapContainer 
+        ref={mapInstanceRef}
         center={[23.8759, 90.3795]} 
         zoom={16} 
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         
-        {busLocations.map((loc, index) => (
+        {busLocations.map((loc) => (
           <Marker 
-            key={index} 
+            key={`${loc.latitude}-${loc.longitude}-${loc.buses.bus_no}`}
             position={[loc.latitude, loc.longitude]} 
             icon={createBusIcon(loc.buses.bus_no)}
           >
             <Popup className="bus-popup">
               <div className="p-1">
-                <p className="text-blue-600 font-black text-sm uppercase m-0">${loc.buses.bus_no}</p>
-                <p className="text-slate-500 text-xs font-semibold m-0">${loc.buses.route_name}</p>
+                <p className="text-blue-600 font-black text-sm uppercase m-0">{loc.buses.bus_no}</p>
+                <p className="text-slate-500 text-xs font-semibold m-0">{loc.buses.route_name}</p>
                 <div className="mt-2 flex items-center gap-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  <span className="text-[10px] font-bold text-slate-700">${loc.speed} km/h</span>
+                  <span className="text-[10px] font-bold text-slate-700">{loc.speed} km/h</span>
                 </div>
               </div>
             </Popup>
