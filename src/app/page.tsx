@@ -21,6 +21,7 @@ export default function Dashboard() {
   // UI States
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Mobile first: Start collapsed
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);    // Mobile first: Start closed
+  const [currentLocation, setCurrentLocation] = useState<string | null>(null);
 
   useEffect(() => {
     // Clock Logic
@@ -47,6 +48,26 @@ export default function Dashboard() {
     handleResize();
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Listen for location events dispatched by Map
+  useEffect(() => {
+    const handler = (e: any) => {
+      const detail = e?.detail;
+      if (!detail) {
+        setCurrentLocation('Unable to get location');
+        return;
+      }
+      const { latitude, longitude } = detail;
+      if (typeof latitude === 'number' && typeof longitude === 'number') {
+        setCurrentLocation(`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`);
+      } else {
+        setCurrentLocation('Unknown');
+      }
+    };
+
+    window.addEventListener('user-location', handler as EventListener);
+    return () => window.removeEventListener('user-location', handler as EventListener);
   }, []);
 
   return (
@@ -83,7 +104,13 @@ export default function Dashboard() {
             <div className="absolute top-4 right-4 md:top-6 md:right-6 flex gap-2 md:gap-3 z-20">
               
               {/* Track Me Button - Hides text on mobile to save space */}
-              <button className={`bg-[#facc15] hover:bg-[#eab308] text-slate-900 h-9 md:h-11 rounded-xl md:rounded-2xl font-black text-[10px] md:text-[11px] uppercase shadow-xl transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 border border-yellow-400/50 ${isRightPanelOpen ? 'px-4 md:px-6' : 'w-9 md:w-11 px-0'}`}>
+              <button
+                onClick={() => {
+                  setIsRightPanelOpen(true);
+                  // Ask Map to track user
+                  window.dispatchEvent(new Event('track-user'));
+                }}
+                className={`bg-[#facc15] hover:bg-[#eab308] text-slate-900 h-9 md:h-11 rounded-xl md:rounded-2xl font-black text-[10px] md:text-[11px] uppercase shadow-xl transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 border border-yellow-400/50 ${isRightPanelOpen ? 'px-4 md:px-6' : 'w-9 md:w-11 px-0'}`}>
                 <Target className="shrink-0 w-3.5 h-3.5 md:w-4 md:h-4" />
                 <span className={`overflow-hidden transition-all duration-300 hidden md:block ${isRightPanelOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>Track Near Me</span>
               </button>
@@ -98,7 +125,7 @@ export default function Dashboard() {
             </div>
 
             {/* --- Right Panel Component --- */}
-            <RightPanel isOpen={isRightPanelOpen} />
+            <RightPanel isOpen={isRightPanelOpen} currentLocation={currentLocation} />
           </>
         ) : (
           <div className="z-10 h-full w-full p-0 md:p-4 lg:p-8 overflow-auto bg-white/50 backdrop-blur-md">
