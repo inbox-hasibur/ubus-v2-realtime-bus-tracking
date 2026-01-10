@@ -11,9 +11,23 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Bus Marker Styles */
+/* Custom Bus Marker Styling */
 .bus-marker-badge {
-  @apply w-9 h-9 flex items-center justify-center rounded-full bg-yellow-300 text-slate-900 font-black text-sm border border-black/50 shadow-sm;
+  @apply bg-yellow-400 text-black w-9 h-9 rounded-full flex items-center justify-center font-black text-sm border-2 border-slate-700 shadow-lg transition-transform duration-300;
+}
+
+.bus-marker-pointer {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #334155; /* Matches border color of the badge */
+  margin-top: -2px;
+}
+
+/* Polyline glow effect (Optional) */
+.leaflet-interactive {
+  filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.5));
 }
 
 .bus-marker-pointer {

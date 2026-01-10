@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMapEvent, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvent, useMap, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
@@ -9,8 +9,9 @@ import { supabase } from "@/lib/supabase";
 export default function Map() {
   const [busLocations, setBusLocations] = useState<any[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [geometries, setGeometries] = useState<any[]>([]); 
   const mapInstanceRef = useRef<any>(null);
-
+  
   // Memoized function to get user location and center map
   const trackMe = useCallback(() => {
     if (!navigator.geolocation) {
@@ -65,19 +66,24 @@ export default function Map() {
 
   const fetchLocations = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch Bus Locations
+      const { data: locs, error: locError } = await supabase
         .from('bus_locations')
-        .select(`
-          latitude, 
-          longitude, 
-          speed,
-          buses (bus_no, route_name)
-        `);
+        .select(`latitude, longitude, speed, buses (bus_no, route_name)`);
 
-      if (error) throw error;
-      if (data) setBusLocations(data);
+      if (locError) throw locError;
+      if (locs) setBusLocations(locs);
+
+      // Fetch Road Geometries (Polylines)
+      const { data: geom, error: geomError } = await supabase
+        .from('route_geometry')
+        .select(`points, routes(route_color)`);
+      
+      if (geomError) throw geomError;
+      if (geom) setGeometries(geom);
+
     } catch (err) {
-      console.error("Error fetching locations:", err);
+      console.error("Error fetching data:", err);
     }
   }, []);
 
@@ -160,8 +166,24 @@ export default function Map() {
         zoom={16}
         style={{ height: "100%", width: "100%" }}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" attribution='&copy; Google Maps'/>
         <MapInstanceHelper />
+
+        {/* --- Render Route Paths (Polylines) --- */}
+        {geometries.map((g, i) => (
+          <Polyline 
+            key={`route-path-${i}`}
+            positions={JSON.parse(g.points)} 
+            pathOptions={{ 
+              color: g.routes?.route_color || '#3b82f6', 
+              weight: 7,          // Thicker line
+              opacity: 0.5,        // Semi-transparent
+              lineJoin: 'round',   // Smooth corners
+              lineCap: 'round'
+            }} 
+          />
+        ))}
+
         {markers}
       </MapContainer>
     </div>
