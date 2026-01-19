@@ -7,6 +7,7 @@ import BusSchedule from "@/components/BusSchedule";
 import ClassSchedule from "@/components/ClassSchedule";
 import Sidebar from "@/components/Sidebar";
 import RightPanel from "@/components/RightPanel";
+import Settings from "@/components/Settings";
 
 const MapView = dynamic(() => import("@/components/Map"), { 
   ssr: false,
@@ -124,11 +125,10 @@ export default function Dashboard() {
             {/* Top Right Actions (Hamburger & Track) */}
             <div className="absolute top-4 right-4 md:top-6 md:right-6 flex gap-2 md:gap-3 z-20">
               
-              {/* Track Me Button - Hides text on mobile to save space */}
+              {/* Track Me Button */}
               <button
                 onClick={() => {
                   setIsRightPanelOpen(true);
-                  // Ask Map to track user
                   window.dispatchEvent(new Event('track-user'));
                 }}
                 className={`bg-[#facc15] hover:bg-[#eab308] text-slate-900 h-9 md:h-11 rounded-xl md:rounded-2xl font-black text-[10px] md:text-[11px] uppercase shadow-xl transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 border border-yellow-400/50 ${isRightPanelOpen ? 'px-4 md:px-6' : 'w-9 md:w-11 px-0'}`}>
@@ -136,7 +136,7 @@ export default function Dashboard() {
                 <span className={`overflow-hidden transition-all duration-300 hidden md:block ${isRightPanelOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>Track Near Me</span>
               </button>
               
-              {/* Menu Toggle Button - Updated to match Dark Badges when closed */}
+              {/* Menu Toggle Button */}
               <button 
                 onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
                 className={`h-9 w-9 md:h-11 md:w-11 flex items-center justify-center rounded-xl md:rounded-2xl shadow-xl border transition-all active:scale-95 
@@ -163,9 +163,17 @@ export default function Dashboard() {
           </>
         ) : (
           <div className="z-10 h-full w-full p-0 md:p-4 lg:p-8 overflow-auto bg-white/50 backdrop-blur-md">
-            {activeTab === "schedule" ? <BusSchedule /> : activeTab === "class" ? <ClassSchedule /> : 
-              <div className="flex items-center justify-center h-full text-slate-400 font-bold uppercase tracking-widest text-xs">Settings Coming Soon</div>
-            }
+            {activeTab === "schedule" ? (
+              <BusSchedule />
+            ) : activeTab === "class" ? (
+              <ClassSchedule />
+            ) : activeTab === "settings" ? (
+              <Settings />
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-400 font-bold uppercase tracking-widest text-xs">
+                Page Coming Soon
+              </div>
+            )}
           </div>
         )}
 
