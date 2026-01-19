@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, MapPin, Plus, BookOpen, ChevronDown, Trash2, Edit3, X, LogOut } from "lucide-react";
+import { Clock, MapPin, Plus, BookOpen, ChevronDown, Trash2, Edit3, X, LogOut, Bell, BellOff } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import StudentLogin from "./StudentLogin";
 
@@ -23,6 +23,64 @@ export default function ClassSchedule() {
     class_time: "",
     room_no: ""
   });
+
+  // --- Notification Logic ---
+  const [notifyEnabled, setNotifyEnabled] = useState(false);
+  const [notifiedEvents, setNotifiedEvents] = useState<Set<string>>(new Set());
+
+  // 1. Permission Request
+  const toggleNotification = () => {
+    if (!notifyEnabled) {
+      Notification.requestPermission().then((perm) => {
+        if (perm === "granted") {
+          setNotifyEnabled(true);
+          new Notification("UBUS Alert Active", { body: "You will be notified before classes start!" });
+        } else {
+          alert("Please allow notifications in your browser settings.");
+        }
+      });
+    } else {
+      setNotifyEnabled(false);
+    }
+  };
+
+  // 2. Time Checker (Runs every 10 seconds)
+  useEffect(() => {
+    if (!notifyEnabled || classes.length === 0) return;
+
+    const checkTime = () => {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      classes.forEach((cls) => {
+        // Parse "08:30 AM" to minutes
+        const timePart = cls.class_time.split("-")[0].trim();
+        const [time, modifier] = timePart.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+        
+        if (modifier === "PM" && hours < 12) hours += 12;
+        if (modifier === "AM" && hours === 12) hours = 0;
+        
+        const classStartMinutes = hours * 60 + minutes;
+        const diff = classStartMinutes - currentMinutes;
+
+        const sendAlert = (key: string, title: string, body: string) => {
+          const eventKey = `${cls.id}-${key}`;
+          if (!notifiedEvents.has(eventKey)) {
+            new Notification(title, { body });
+            setNotifiedEvents(prev => new Set(prev).add(eventKey));
+          }
+        };
+
+        if (diff === 15) sendAlert("15min", "Hurry Up!", `15 mins left for ${cls.course_name}`);
+        if (diff === 5) sendAlert("5min", "Get Ready", `5 mins left for ${cls.course_name}`);
+        if (diff === 0) sendAlert("start", "Class Started", `${cls.course_name} is starting now!`);
+      });
+    };
+
+    const interval = setInterval(checkTime, 10000);
+    return () => clearInterval(interval);
+  }, [notifyEnabled, classes, notifiedEvents]);
 
   // --- 1. Auth Check & Initial Setup ---
   useEffect(() => {
@@ -166,7 +224,19 @@ export default function ClassSchedule() {
           <button onClick={() => { setEditingId(null); setIsModalOpen(true); }} className="bg-slate-900 text-white p-2 rounded-lg hover:bg-blue-600 transition-all shadow-md active:scale-95" title="Add Class">
             <Plus className="w-4 h-4" />
           </button>
-
+          {/* Notification Button */}
+          <button 
+            onClick={toggleNotification}
+            className={`p-2 rounded-lg transition-all shadow-md active:scale-95 border ${
+              notifyEnabled 
+                ? "bg-yellow-400 text-slate-900 border-yellow-500 animate-pulse" 
+                : "bg-white text-slate-400 border-slate-200 hover:text-yellow-600"
+            }`}
+            title={notifyEnabled ? "Disable Alerts" : "Enable Class Alerts"}
+          >
+            {notifyEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+          </button>
+          
           <button onClick={handleLogout} className="bg-red-50 text-red-500 border border-red-100 p-2 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95" title="Logout">
             <LogOut className="w-4 h-4" />
           </button>
