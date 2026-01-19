@@ -7,6 +7,25 @@ import StudentLogin from "./StudentLogin";
 
 const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+// Helper: Calculate Time Range (Start + 1 Hour)
+const calculateTimeRange = (time24: string) => {
+  if (!time24) return "";
+  const [hours, minutes] = time24.split(":").map(Number);
+  
+  // Format 12 Hour Function
+  const format12 = (h: number, m: number) => {
+    const period = h >= 12 ? "PM" : "AM"; // Simple AM/PM logic
+    const h12 = h % 12 || 12; // Convert 0/13/24 to 12-based
+    return `${h12.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")} ${period}`;
+  };
+
+  const startStr = format12(hours, minutes);
+  const endH = (hours + 1) % 24; // Add 1 Hour
+  const endStr = format12(endH, minutes);
+
+  return `${startStr} - ${endStr}`;
+};
+
 export default function ClassSchedule() {
   // --- States ---
   const [classes, setClasses] = useState<any[]>([]);
@@ -277,7 +296,7 @@ export default function ClassSchedule() {
         )}
       </div>
 
-      {/* Modal */}
+      {/* --- Modal --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
@@ -286,19 +305,43 @@ export default function ClassSchedule() {
             <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-5">{editingId ? 'Edit Class' : 'Add Class'}</h3>
             
             <form onSubmit={handleSubmit} className="space-y-3">
-              <input type="text" placeholder="Course Name" required className="w-full bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-bold outline-none" 
-                value={formData.course_name} onChange={e => setFormData({...formData, course_name: e.target.value})} />
+              <div>
+                <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Course Name</label>
+                <input type="text" required className="w-full bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-bold outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                  value={formData.course_name} onChange={e => setFormData({...formData, course_name: e.target.value})} />
+              </div>
               
-              <select className="w-full bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-bold outline-none"
-                value={formData.class_day} onChange={e => setFormData({...formData, class_day: e.target.value})}>
-                {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{day}</option>)}
-              </select>
+              <div>
+                <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Class Day</label>
+                <select className="w-full bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-bold outline-none"
+                  value={formData.class_day} onChange={e => setFormData({...formData, class_day: e.target.value})}>
+                  {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{day}</option>)}
+                </select>
+              </div>
 
-              <input type="text" placeholder="Time (08:30 AM - 10:00 AM)" required className="w-full bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-bold outline-none" 
-                value={formData.class_time} onChange={e => setFormData({...formData, class_time: e.target.value})} />
+              {/* --- New Auto Time Calculation Input --- */}
+              <div>
+                <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Start Time (Auto 1 Hour)</label>
+                <input 
+                  type="time" 
+                  required 
+                  className="w-full bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-bold outline-none cursor-pointer" 
+                  onChange={(e) => {
+                    const timeString = calculateTimeRange(e.target.value);
+                    setFormData({...formData, class_time: timeString});
+                  }} 
+                />
+                {/* Preview the calculated time */}
+                <p className="text-[10px] font-black text-blue-600 mt-1 ml-1 tracking-wide">
+                  {formData.class_time || "Select a time"}
+                </p>
+              </div>
 
-              <input type="text" placeholder="Room (Room 402)" required className="w-full bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-bold outline-none" 
-                value={formData.room_no} onChange={e => setFormData({...formData, room_no: e.target.value})} />
+              <div>
+                <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Room / Lab</label>
+                <input type="text" required className="w-full bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-bold outline-none" 
+                  value={formData.room_no} onChange={e => setFormData({...formData, room_no: e.target.value})} />
+              </div>
 
               <button type="submit" className="w-full bg-slate-900 text-white py-3.5 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-blue-600 transition-all mt-2">
                 {editingId ? 'Update Entry' : 'Create Entry'}
