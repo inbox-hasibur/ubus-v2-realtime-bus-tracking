@@ -1,16 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, MapPin, Plus, BookOpen, ChevronDown, Trash2, Edit3, X } from "lucide-react";
+import { Clock, MapPin, Plus, BookOpen, ChevronDown, Trash2, Edit3, X, LogOut } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import StudentLogin from "./StudentLogin";
 
 const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export default function ClassSchedule() {
+  // --- States ---
   const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
+  // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -20,29 +24,52 @@ export default function ClassSchedule() {
     room_no: ""
   });
 
+  // --- 1. Auth Check & Initial Setup ---
   useEffect(() => {
     const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
     setSelectedDay(today);
-    fetchClasses();
+
+    // Check Local Storage for Login Session
+    const savedId = localStorage.getItem("student_id");
+    if (savedId) {
+      setCurrentUserId(savedId);
+    } else {
+      setLoading(false); // Stop loading to show Login Screen
+    }
   }, []);
 
+  // --- 2. Fetch Data when User Logs in ---
+  useEffect(() => {
+    if (currentUserId) {
+      fetchClasses();
+    }
+  }, [currentUserId]);
+
   const fetchClasses = async () => {
+    if (!currentUserId) return;
+
     const { data, error } = await supabase
       .from("class_schedules")
       .select("*")
+      .eq("user_id", currentUserId) // Filter by Student ID
       .order('class_time', { ascending: true });
+      
     if (!error && data) setClasses(data);
     setLoading(false);
   };
 
+  // --- 3. CRUD Operations ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
+    // Add Student ID to the data
+    const payload = { ...formData, user_id: currentUserId };
+
     if (editingId) {
-      await supabase.from("class_schedules").update(formData).eq("id", editingId);
+      await supabase.from("class_schedules").update(payload).eq("id", editingId);
     } else {
-      await supabase.from("class_schedules").insert([formData]);
+      await supabase.from("class_schedules").insert([payload]);
     }
 
     setEditingId(null);
@@ -69,9 +96,13 @@ export default function ClassSchedule() {
     setIsModalOpen(true);
   };
 
-  const filteredClasses = classes.filter(c => c.class_day === selectedDay);
+  // --- 4. Helper Functions ---
+  const handleLogout = () => {
+    localStorage.removeItem("student_id");
+    setCurrentUserId(null);
+    setLoading(false);
+  };
 
-  // Helper function to split time into two lines
   const formatTime = (timeStr: string) => {
     const parts = timeStr.split("-");
     return (
@@ -82,7 +113,6 @@ export default function ClassSchedule() {
     );
   };
 
-  // Helper function to split Room and Number
   const formatRoom = (roomStr: string) => {
     const match = roomStr.match(/([a-zA-Z]+)\s*(.*)/);
     if (match) {
@@ -96,14 +126,33 @@ export default function ClassSchedule() {
     return roomStr;
   };
 
-  if (loading && classes.length === 0) return <div className="p-10 text-center animate-pulse text-slate-400 font-bold uppercase text-[9px] tracking-widest">Loading...</div>;
+  // --- 5. Conditional Rendering (Login vs Schedule) ---
+  
+  // If no user ID, Show Login Screen
+  if (!currentUserId && !loading) {
+    return <StudentLogin onLogin={(id) => setCurrentUserId(id)} />;
+  }
 
+  // Loading State
+  if (loading && classes.length === 0) {
+    return <div className="p-10 text-center animate-pulse text-slate-400 font-bold uppercase text-[9px] tracking-widest">Loading...</div>;
+  }
+
+  const filteredClasses = classes.filter(c => c.class_day === selectedDay);
+
+  // Main Schedule UI
   return (
     <div className="p-4 h-full flex flex-col font-sans relative">
+      
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter">My Schedule</h2>
-          <p className="text-[9px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">Showing {selectedDay}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">ID: {currentUserId}</p>
+            <span className="text-slate-300">•</span>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{selectedDay}</p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -113,12 +162,18 @@ export default function ClassSchedule() {
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
           </div>
-          <button onClick={() => { setEditingId(null); setIsModalOpen(true); }} className="bg-slate-900 text-white p-2 rounded-lg hover:bg-blue-600 transition-all shadow-md active:scale-95">
+          
+          <button onClick={() => { setEditingId(null); setIsModalOpen(true); }} className="bg-slate-900 text-white p-2 rounded-lg hover:bg-blue-600 transition-all shadow-md active:scale-95" title="Add Class">
             <Plus className="w-4 h-4" />
+          </button>
+
+          <button onClick={handleLogout} className="bg-red-50 text-red-500 border border-red-100 p-2 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95" title="Logout">
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>
 
+      {/* List */}
       <div className="space-y-3 overflow-y-auto pr-1 custom-scrollbar">
         {filteredClasses.map((item) => (
           <div key={item.id} className="bg-white/90 backdrop-blur-sm p-4 rounded-[24px] border border-white shadow-sm flex items-center gap-4 hover:border-blue-200 transition-all group">
@@ -130,20 +185,15 @@ export default function ClassSchedule() {
               <div className="flex items-start gap-5">
                 <div className="flex items-start gap-2">
                    <Clock className="w-3 h-3 text-blue-500 mt-0.5" />
-                   <div className="text-[9px] uppercase leading-tight tracking-tight">
-                      {formatTime(item.class_time)}
-                   </div>
+                   <div className="text-[9px] uppercase leading-tight tracking-tight">{formatTime(item.class_time)}</div>
                 </div>
                 <div className="flex items-start gap-2">
                    <MapPin className="w-3 h-3 text-red-500 mt-0.5" />
-                   <div className="text-[9px] uppercase leading-tight tracking-tight">
-                      {formatRoom(item.room_no)}
-                   </div>
+                   <div className="text-[9px] uppercase leading-tight tracking-tight">{formatRoom(item.room_no)}</div>
                 </div>
               </div>
             </div>
             
-            {/* Actions: Always visible on mobile, slightly transparent on idle */}
             <div className="flex flex-col gap-1 shrink-0">
                <button onClick={() => startEdit(item)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Edit3 className="w-3.5 h-3.5" /></button>
                <button onClick={() => handleDelete(item.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
@@ -157,7 +207,7 @@ export default function ClassSchedule() {
         )}
       </div>
 
-      {/* Modal code remains same but updated to be more compact ... */}
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
