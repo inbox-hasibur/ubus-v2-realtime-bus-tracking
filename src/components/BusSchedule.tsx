@@ -129,8 +129,8 @@ export default function BusSchedule() {
   };
 
   const filteredRoutes = routes.filter((item) =>
-    item.route_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.bus_number.toLowerCase().includes(searchTerm.toLowerCase())
+    String(item.route_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    String(item.bus_number || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
