@@ -74,8 +74,9 @@ export default function Dashboard() {
 
   // Listen for location events dispatched by Map
   useEffect(() => {
-    const handler = (e: any) => {
-      const detail = e?.detail;
+    const handler = (e: Event) => {
+      const customEvent = e as CustomEvent<{ latitude?: number; longitude?: number } | null>;
+      const detail = customEvent?.detail;
       if (!detail) {
         setCurrentLocation('Unable to get location');
         return;
@@ -88,8 +89,8 @@ export default function Dashboard() {
       }
     };
 
-    window.addEventListener('user-location', handler as EventListener);
-    return () => window.removeEventListener('user-location', handler as EventListener);
+    window.addEventListener('user-location', handler);
+    return () => window.removeEventListener('user-location', handler);
   }, []);
 
   return (

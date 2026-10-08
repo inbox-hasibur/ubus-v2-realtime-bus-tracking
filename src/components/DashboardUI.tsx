@@ -36,7 +36,7 @@ export function InfoBlock({ label, value, subValue }: { label: string, value: st
 }
 
 // --- Nav Item (Compact Size) ---
-export function NavItem({ icon, label, active = false, onClick, collapsed }: { icon: any, label: string, active?: boolean, onClick?: () => void, collapsed: boolean }) {
+export function NavItem({ icon, label, active = false, onClick, collapsed }: { icon: ReactNode, label: string, active?: boolean, onClick?: () => void, collapsed: boolean }) {
   return (
     <button 
       onClick={onClick}

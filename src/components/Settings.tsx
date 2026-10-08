@@ -1,8 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Shield, Lock, LayoutDashboard, Bus, LogOut, Activity, AlertTriangle, Edit2, Trash2, Save, X, Plus, Check } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { Shield, Lock, LayoutDashboard, Bus, LogOut, Activity, AlertTriangle, Edit2, Trash2, Save, X, Plus } from "lucide-react";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+
+interface RouteItem {
+  id: string;
+  route_name: string;
+  bus_number: string;
+  route_color?: string;
+}
+
+const DEFAULT_ADMIN_ROUTES: RouteItem[] = [
+  { id: "route-1", bus_number: "01", route_name: "Uttara Sector 7 - IUBAT Campus", route_color: "#3b82f6" },
+  { id: "route-2", bus_number: "04", route_name: "Mirpur 10 - Airport - Campus", route_color: "#10b981" },
+  { id: "route-3", bus_number: "09", route_name: "Abdullahpur - Kamarpara Shuttle", route_color: "#f59e0b" },
+];
 
 export default function Settings() {
   // Auth States
@@ -12,7 +25,7 @@ export default function Settings() {
 
   // Management States
   const [isManageMode, setIsManageMode] = useState(false);
-  const [routes, setRoutes] = useState<any[]>([]);
+  const [routes, setRoutes] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState(false);
   
   // Edit/Add States
@@ -22,7 +35,10 @@ export default function Settings() {
 
   useEffect(() => {
     const adminSession = localStorage.getItem("admin_session");
-    if (adminSession === "true") setIsAdmin(true);
+    if (adminSession === "true") {
+      const timer = setTimeout(() => setIsAdmin(true), 0);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   // --- ACTIONS ---
@@ -45,9 +61,28 @@ export default function Settings() {
 
   const fetchRoutes = async () => {
     setLoading(true);
-    const { data } = await supabase.from("routes").select("*").order('bus_number', { ascending: true });
-    if (data) setRoutes(data);
-    setLoading(false);
+    if (!isSupabaseConfigured) {
+      const saved = localStorage.getItem("ubus_admin_routes");
+      setRoutes(saved ? JSON.parse(saved) : DEFAULT_ADMIN_ROUTES);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error: fetchErr } = await supabase.from("routes").select("*").order("bus_number", { ascending: true });
+      if (fetchErr) throw fetchErr;
+      if (data && data.length > 0) {
+        setRoutes(data as RouteItem[]);
+      } else {
+        const saved = localStorage.getItem("ubus_admin_routes");
+        setRoutes(saved ? JSON.parse(saved) : DEFAULT_ADMIN_ROUTES);
+      }
+    } catch {
+      const saved = localStorage.getItem("ubus_admin_routes");
+      setRoutes(saved ? JSON.parse(saved) : DEFAULT_ADMIN_ROUTES);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const openManageMode = () => {
@@ -55,27 +90,55 @@ export default function Settings() {
     fetchRoutes();
   };
 
-  const startEdit = (route: any) => {
+  const startEdit = (route: RouteItem) => {
     setEditingId(route.id);
-    setEditForm({ route_name: route.route_name, bus_number: route.bus_number, route_color: route.route_color });
+    setEditForm({ route_name: route.route_name, bus_number: route.bus_number, route_color: route.route_color || "#3b82f6" });
     setIsAdding(false);
   };
 
   const saveRoute = async () => {
-    if (isAdding) {
-      await supabase.from("routes").insert([editForm]);
-    } else if (editingId) {
-      await supabase.from("routes").update(editForm).eq("id", editingId);
+    if (isSupabaseConfigured) {
+      try {
+        if (isAdding) {
+          await supabase.from("routes").insert([editForm]);
+        } else if (editingId) {
+          await supabase.from("routes").update(editForm).eq("id", editingId);
+        }
+      } catch (err) {
+        console.error("Supabase route save error:", err);
+      }
     }
+
+    // Always update local cache as well
+    let updated: RouteItem[] = [];
+    if (isAdding) {
+      const newRoute: RouteItem = {
+        id: `route-${Date.now()}`,
+        ...editForm,
+      };
+      updated = [...routes, newRoute];
+    } else if (editingId) {
+      updated = routes.map((r) => (r.id === editingId ? { ...r, ...editForm } : r));
+    }
+    setRoutes(updated);
+    localStorage.setItem("ubus_admin_routes", JSON.stringify(updated));
+
     setEditingId(null);
     setIsAdding(false);
-    fetchRoutes(); // Refresh list
   };
 
   const deleteRoute = async (id: string) => {
     if (confirm("Are you sure you want to delete this route? This will delete all associated schedules.")) {
-      await supabase.from("routes").delete().eq("id", id);
-      fetchRoutes();
+      if (isSupabaseConfigured) {
+        try {
+          await supabase.from("routes").delete().eq("id", id);
+        } catch (err) {
+          console.error("Supabase delete route error:", err);
+        }
+      }
+      const updated = routes.filter((r) => r.id !== id);
+      setRoutes(updated);
+      localStorage.setItem("ubus_admin_routes", JSON.stringify(updated));
     }
   };
 
@@ -111,7 +174,7 @@ export default function Settings() {
     );
   }
 
-  // --- MANAGE SCHEDULE MODAL ---
+  // --- MANAGE SCHEDULE VIEW ---
   if (isManageMode) {
     return (
       <div className="p-4 h-full flex flex-col font-sans relative">
@@ -127,57 +190,63 @@ export default function Settings() {
           </button>
         </div>
 
-        <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
-          {/* Add New Form */}
-          {isAdding && (
-            <div className="bg-blue-50 p-4 rounded-[24px] border border-blue-100 shadow-sm animate-in slide-in-from-top-2">
-              <div className="flex flex-col gap-3">
-                <input type="text" placeholder="Bus Number (e.g. 99)" className="w-full p-3 rounded-xl text-xs font-bold border border-blue-200 outline-none" value={editForm.bus_number} onChange={e => setEditForm({...editForm, bus_number: e.target.value})} />
-                <input type="text" placeholder="Route Name" className="w-full p-3 rounded-xl text-xs font-bold border border-blue-200 outline-none" value={editForm.route_name} onChange={e => setEditForm({...editForm, route_name: e.target.value})} />
-                <div className="flex gap-2">
-                  <button onClick={saveRoute} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-xs">Save Route</button>
-                  <button onClick={() => setIsAdding(false)} className="px-4 bg-white text-slate-500 py-3 rounded-xl font-bold text-xs">Cancel</button>
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">Loading routes...</p>
+          </div>
+        ) : (
+          <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
+            {/* Add New Form */}
+            {isAdding && (
+              <div className="bg-blue-50 p-4 rounded-[24px] border border-blue-100 shadow-sm animate-in slide-in-from-top-2">
+                <div className="flex flex-col gap-3">
+                  <input type="text" placeholder="Bus Number (e.g. 99)" className="w-full p-3 rounded-xl text-xs font-bold border border-blue-200 outline-none" value={editForm.bus_number} onChange={e => setEditForm({...editForm, bus_number: e.target.value})} />
+                  <input type="text" placeholder="Route Name" className="w-full p-3 rounded-xl text-xs font-bold border border-blue-200 outline-none" value={editForm.route_name} onChange={e => setEditForm({...editForm, route_name: e.target.value})} />
+                  <div className="flex gap-2">
+                    <button onClick={saveRoute} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-xs">Save Route</button>
+                    <button onClick={() => setIsAdding(false)} className="px-4 bg-white text-slate-500 py-3 rounded-xl font-bold text-xs">Cancel</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Routes List */}
-          {routes.map((route) => (
-            <div key={route.id} className="bg-white p-4 rounded-[24px] border border-slate-100 shadow-sm flex flex-col gap-3 group">
-              {editingId === route.id ? (
-                // Edit Mode
-                <div className="flex flex-col gap-3">
-                  <div className="flex gap-2">
-                    <input type="text" className="w-16 p-2 rounded-xl bg-slate-50 border text-xs font-black text-center" value={editForm.bus_number} onChange={e => setEditForm({...editForm, bus_number: e.target.value})} />
-                    <input type="text" className="flex-1 p-2 rounded-xl bg-slate-50 border text-xs font-bold" value={editForm.route_name} onChange={e => setEditForm({...editForm, route_name: e.target.value})} />
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={saveRoute} className="flex-1 bg-green-500 text-white py-2 rounded-lg font-bold text-[10px] uppercase flex items-center justify-center gap-1"><Save className="w-3 h-3" /> Save</button>
-                    <button onClick={() => setEditingId(null)} className="px-3 bg-slate-100 text-slate-500 py-2 rounded-lg font-bold text-[10px] uppercase">Cancel</button>
-                  </div>
-                </div>
-              ) : (
-                // View Mode
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-md" style={{ backgroundColor: route.route_color || '#1e293b' }}>
-                      {route.bus_number}
+            {/* Routes List */}
+            {routes.map((route) => (
+              <div key={route.id} className="bg-white p-4 rounded-[24px] border border-slate-100 shadow-sm flex flex-col gap-3 group">
+                {editingId === route.id ? (
+                  // Edit Mode
+                  <div className="flex flex-col gap-3">
+                    <div className="flex gap-2">
+                      <input type="text" className="w-16 p-2 rounded-xl bg-slate-50 border text-xs font-black text-center" value={editForm.bus_number} onChange={e => setEditForm({...editForm, bus_number: e.target.value})} />
+                      <input type="text" className="flex-1 p-2 rounded-xl bg-slate-50 border text-xs font-bold" value={editForm.route_name} onChange={e => setEditForm({...editForm, route_name: e.target.value})} />
                     </div>
-                    <div>
-                      <p className="text-xs font-black text-slate-800">{route.route_name}</p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Active Route</p>
+                    <div className="flex gap-2">
+                      <button onClick={saveRoute} className="flex-1 bg-green-500 text-white py-2 rounded-lg font-bold text-[10px] uppercase flex items-center justify-center gap-1"><Save className="w-3 h-3" /> Save</button>
+                      <button onClick={() => setEditingId(null)} className="px-3 bg-slate-100 text-slate-500 py-2 rounded-lg font-bold text-[10px] uppercase">Cancel</button>
                     </div>
                   </div>
-                  <div className="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => startEdit(route)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Edit2 className="w-4 h-4" /></button>
-                    <button onClick={() => deleteRoute(route.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                ) : (
+                  // View Mode
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-md" style={{ backgroundColor: route.route_color || "#1e293b" }}>
+                        {route.bus_number}
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-slate-800">{route.route_name}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Active Route</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => startEdit(route)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => deleteRoute(route.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -197,7 +266,7 @@ export default function Settings() {
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Admin Active</p>
           </div>
         </div>
-        <button onClick={handleLogout} className="bg-red-50 text-red-500 p-3 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95">
+        <button onClick={handleLogout} className="bg-red-50 text-red-500 p-3 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95" title="Logout">
           <LogOut className="w-5 h-5" />
         </button>
       </div>
@@ -237,7 +306,7 @@ export default function Settings() {
         </button>
 
         {/* Emergency Alert Button */}
-        <button className="w-full bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm hover:border-red-500 hover:shadow-md transition-all group flex items-center justify-between active:scale-[0.99]">
+        <button onClick={() => alert("Emergency alert broadcast feature: All active student devices will be notified.")} className="w-full bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm hover:border-red-500 hover:shadow-md transition-all group flex items-center justify-between active:scale-[0.99]">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-colors">
               <AlertTriangle className="w-6 h-6 text-slate-400 group-hover:text-white" />

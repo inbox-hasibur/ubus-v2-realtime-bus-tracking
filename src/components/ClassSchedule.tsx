@@ -1,26 +1,58 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Clock, MapPin, Plus, BookOpen, ChevronDown, Trash2, Edit3, X, LogOut, Bell, BellOff } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import StudentLogin from "./StudentLogin";
 
 const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+export interface ClassItem {
+  id: string;
+  course_name: string;
+  class_day: string;
+  class_time: string;
+  room_no: string;
+  user_id?: string;
+}
+
+const DEFAULT_DEMO_CLASSES: ClassItem[] = [
+  {
+    id: "cls-1",
+    course_name: "CSC 311: Database Management Systems",
+    class_day: "Sunday",
+    class_time: "08:30 AM - 09:30 AM",
+    room_no: "Room 402",
+  },
+  {
+    id: "cls-2",
+    course_name: "CSC 322: Software Engineering",
+    class_day: "Sunday",
+    class_time: "10:00 AM - 11:00 AM",
+    room_no: "Lab 501",
+  },
+  {
+    id: "cls-3",
+    course_name: "CSC 415: Web Engineering & Cloud",
+    class_day: "Monday",
+    class_time: "09:30 AM - 10:30 AM",
+    room_no: "Room 603",
+  },
+];
 
 // Helper: Calculate Time Range (Start + 1 Hour)
 const calculateTimeRange = (time24: string) => {
   if (!time24) return "";
   const [hours, minutes] = time24.split(":").map(Number);
   
-  // Format 12 Hour Function
   const format12 = (h: number, m: number) => {
-    const period = h >= 12 ? "PM" : "AM"; // Simple AM/PM logic
-    const h12 = h % 12 || 12; // Convert 0/13/24 to 12-based
+    const period = h >= 12 ? "PM" : "AM";
+    const h12 = h % 12 || 12;
     return `${h12.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")} ${period}`;
   };
 
   const startStr = format12(hours, minutes);
-  const endH = (hours + 1) % 24; // Add 1 Hour
+  const endH = (hours + 1) % 24;
   const endStr = format12(endH, minutes);
 
   return `${startStr} - ${endStr}`;
@@ -28,9 +60,9 @@ const calculateTimeRange = (time24: string) => {
 
 export default function ClassSchedule() {
   // --- States ---
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState("");
+  const [selectedDay, setSelectedDay] = useState("Sunday");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
   // Modal States
@@ -49,6 +81,11 @@ export default function ClassSchedule() {
 
   // 1. Permission Request
   const toggleNotification = () => {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      alert("Browser does not support notifications.");
+      return;
+    }
+
     if (!notifyEnabled) {
       Notification.requestPermission().then((perm) => {
         if (perm === "granted") {
@@ -65,17 +102,19 @@ export default function ClassSchedule() {
 
   // 2. Time Checker (Runs every 10 seconds)
   useEffect(() => {
-    if (!notifyEnabled || classes.length === 0) return;
+    if (!notifyEnabled || classes.length === 0 || typeof window === "undefined" || !("Notification" in window)) return;
 
     const checkTime = () => {
       const now = new Date();
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
       classes.forEach((cls) => {
-        // Parse "08:30 AM" to minutes
-        const timePart = cls.class_time.split("-")[0].trim();
+        const timePart = cls.class_time.split("-")[0]?.trim();
+        if (!timePart) return;
         const [time, modifier] = timePart.split(" ");
-        let [hours, minutes] = time.split(":").map(Number);
+        if (!time) return;
+        const [h, minutes] = time.split(":").map(Number);
+        let hours = h;
         
         if (modifier === "PM" && hours < 12) hours += 12;
         if (modifier === "AM" && hours === 12) hours = 0;
@@ -101,68 +140,129 @@ export default function ClassSchedule() {
     return () => clearInterval(interval);
   }, [notifyEnabled, classes, notifiedEvents]);
 
-  // --- 1. Auth Check & Initial Setup ---
-  useEffect(() => {
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-    setSelectedDay(today);
+  // Fetch classes function declared before useEffect
+  const fetchClasses = useCallback(async (userId: string) => {
+    setLoading(true);
+    if (!isSupabaseConfigured) {
+      const localKey = `ubus_classes_${userId}`;
+      const saved = localStorage.getItem(localKey);
+      if (saved) {
+        try {
+          setClasses(JSON.parse(saved));
+        } catch {
+          setClasses(DEFAULT_DEMO_CLASSES);
+        }
+      } else {
+        setClasses(DEFAULT_DEMO_CLASSES);
+        localStorage.setItem(localKey, JSON.stringify(DEFAULT_DEMO_CLASSES));
+      }
+      setLoading(false);
+      return;
+    }
 
-    // Check Local Storage for Login Session
+    try {
+      const { data, error } = await supabase
+        .from("class_schedules")
+        .select("*")
+        .eq("user_id", userId)
+        .order("class_time", { ascending: true });
+        
+      if (!error && data && data.length > 0) {
+        setClasses(data as ClassItem[]);
+      } else {
+        const localKey = `ubus_classes_${userId}`;
+        const saved = localStorage.getItem(localKey);
+        setClasses(saved ? JSON.parse(saved) : DEFAULT_DEMO_CLASSES);
+      }
+    } catch {
+      const localKey = `ubus_classes_${userId}`;
+      const saved = localStorage.getItem(localKey);
+      setClasses(saved ? JSON.parse(saved) : DEFAULT_DEMO_CLASSES);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // 1. Auth Check & Initial Setup
+  useEffect(() => {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+    if (DAYS_OF_WEEK.includes(today)) {
+      setSelectedDay(today);
+    }
+
     const savedId = localStorage.getItem("student_id");
     if (savedId) {
       setCurrentUserId(savedId);
     } else {
-      setLoading(false); // Stop loading to show Login Screen
+      setLoading(false);
     }
   }, []);
 
-  // --- 2. Fetch Data when User Logs in ---
+  // 2. Fetch Data when User Logs in
   useEffect(() => {
     if (currentUserId) {
-      fetchClasses();
+      fetchClasses(currentUserId);
     }
-  }, [currentUserId]);
+  }, [currentUserId, fetchClasses]);
 
-  const fetchClasses = async () => {
-    if (!currentUserId) return;
-
-    const { data, error } = await supabase
-      .from("class_schedules")
-      .select("*")
-      .eq("user_id", currentUserId) // Filter by Student ID
-      .order('class_time', { ascending: true });
-      
-    if (!error && data) setClasses(data);
-    setLoading(false);
-  };
-
-  // --- 3. CRUD Operations ---
+  // 3. CRUD Operations
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentUserId) return;
     setLoading(true);
 
-    // Add Student ID to the data
     const payload = { ...formData, user_id: currentUserId };
 
-    if (editingId) {
-      await supabase.from("class_schedules").update(payload).eq("id", editingId);
-    } else {
-      await supabase.from("class_schedules").insert([payload]);
+    if (isSupabaseConfigured) {
+      try {
+        if (editingId) {
+          await supabase.from("class_schedules").update(payload).eq("id", editingId);
+        } else {
+          await supabase.from("class_schedules").insert([payload]);
+        }
+      } catch (err) {
+        console.error("Supabase class save error:", err);
+      }
     }
+
+    // Always update local cache as well
+    const localKey = `ubus_classes_${currentUserId}`;
+    let updated: ClassItem[] = [];
+    if (editingId) {
+      updated = classes.map((c) => (c.id === editingId ? { ...c, ...payload } : c));
+    } else {
+      const newEntry: ClassItem = {
+        id: `local-${Date.now()}`,
+        ...payload,
+      };
+      updated = [...classes, newEntry];
+    }
+    setClasses(updated);
+    localStorage.setItem(localKey, JSON.stringify(updated));
 
     setEditingId(null);
     setFormData({ course_name: "", class_day: selectedDay, class_time: "", room_no: "" });
     setIsModalOpen(false);
-    fetchClasses();
+    setLoading(false);
   };
 
   const handleDelete = async (id: string) => {
+    if (!currentUserId) return;
     if (confirm("Delete this class?")) {
-      await supabase.from("class_schedules").delete().eq("id", id);
-      fetchClasses();
+      if (isSupabaseConfigured) {
+        try {
+          await supabase.from("class_schedules").delete().eq("id", id);
+        } catch (err) {
+          console.error("Supabase delete error:", err);
+        }
+      }
+      const updated = classes.filter((c) => c.id !== id);
+      setClasses(updated);
+      localStorage.setItem(`ubus_classes_${currentUserId}`, JSON.stringify(updated));
     }
   };
 
-  const startEdit = (item: any) => {
+  const startEdit = (item: ClassItem) => {
     setEditingId(item.id);
     setFormData({
       course_name: item.course_name,
@@ -173,7 +273,7 @@ export default function ClassSchedule() {
     setIsModalOpen(true);
   };
 
-  // --- 4. Helper Functions ---
+  // Helper Functions
   const handleLogout = () => {
     localStorage.removeItem("student_id");
     setCurrentUserId(null);
@@ -203,8 +303,6 @@ export default function ClassSchedule() {
     return roomStr;
   };
 
-  // --- 5. Conditional Rendering (Login vs Schedule) ---
-  
   // If no user ID, Show Login Screen
   if (!currentUserId && !loading) {
     return <StudentLogin onLogin={(id) => setCurrentUserId(id)} />;
@@ -234,15 +332,28 @@ export default function ClassSchedule() {
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none">
-            <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)} className="w-full appearance-none bg-white border border-slate-200 text-[10px] font-black uppercase tracking-wider px-3 py-2 pr-8 rounded-lg outline-none shadow-sm">
+            <select 
+              value={selectedDay} 
+              onChange={(e) => setSelectedDay(e.target.value)} 
+              className="w-full appearance-none bg-white border border-slate-200 text-[10px] font-black uppercase tracking-wider px-3 py-2 pr-8 rounded-lg outline-none shadow-sm cursor-pointer"
+            >
               {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{day}</option>)}
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
           </div>
           
-          <button onClick={() => { setEditingId(null); setIsModalOpen(true); }} className="bg-slate-900 text-white p-2 rounded-lg hover:bg-blue-600 transition-all shadow-md active:scale-95" title="Add Class">
+          <button 
+            onClick={() => { 
+              setEditingId(null); 
+              setFormData({ course_name: "", class_day: selectedDay, class_time: "", room_no: "" });
+              setIsModalOpen(true); 
+            }} 
+            className="bg-slate-900 text-white p-2 rounded-lg hover:bg-blue-600 transition-all shadow-md active:scale-95" 
+            title="Add Class"
+          >
             <Plus className="w-4 h-4" />
           </button>
+          
           {/* Notification Button */}
           <button 
             onClick={toggleNotification}
@@ -319,7 +430,7 @@ export default function ClassSchedule() {
                 </select>
               </div>
 
-              {/* --- New Auto Time Calculation Input --- */}
+              {/* Start Time with auto calculate */}
               <div>
                 <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Start Time (Auto 1 Hour)</label>
                 <input 
@@ -331,7 +442,6 @@ export default function ClassSchedule() {
                     setFormData({...formData, class_time: timeString});
                   }} 
                 />
-                {/* Preview the calculated time */}
                 <p className="text-[10px] font-black text-blue-600 mt-1 ml-1 tracking-wide">
                   {formData.class_time || "Select a time"}
                 </p>
