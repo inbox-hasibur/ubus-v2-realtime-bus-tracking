@@ -21,19 +21,11 @@ body {
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 8px solid #334155; /* Matches border color of the badge */
+  border-top: 8px solid #facc15;
   margin-top: -2px;
 }
 
 /* Polyline glow effect (Optional) */
 .leaflet-interactive {
   filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.5));
-}
-
-.bus-marker-pointer {
-  @apply w-0 h-0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 6px solid #facc15;
-  margin-top: -4px;
-}
+}
