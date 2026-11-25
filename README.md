@@ -105,8 +105,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Documentation
 
+- **[About Project](documentation/ABOUT-PROJECT.md)** — Concept, tech stack, architecture, and file tree.
+- **[Backlog & Sprints](documentation/BACKLOG.md)** — Sprint tracking (`[x]` / `[ ]`) and upcoming tasks.
 - **[Changelog](documentation/CHANGELOG.md)** — Version history and release notes.
-- **[Developer Guide](documentation/DEVELOPER_GUIDE.md)** — Architecture, project structure, and implementation notes.
+- **[Codebase Map](documentation/CODEBASE-MAP.md)** — Full architecture, knowledge graph, data flow, and change impact.
+- **[Frontend Map](documentation/FRONTEND-MAP.md)** — Responsive breakpoints, theme sync, z-index layers, and UI bug-fix map.
+- **[Developer Guide](documentation/DEVELOPER_GUIDE.md)** — Setup and implementation notes.
 - **[Agent Instructions](AGENTS.md)** — Repository workflow and commit conventions.
 
 ---
