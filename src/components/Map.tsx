@@ -19,12 +19,13 @@ import {
   Minus, 
   Compass, 
   Crosshair, 
-  Activity, 
   Radio, 
   Sparkles, 
   Check, 
-  Zap, 
-  Route as RouteIcon 
+  Zap,
+  Route as RouteIcon,
+  Bus,
+  MapPin
 } from "lucide-react";
 import MapLibreView from "@/components/MapLibreView";
 
@@ -54,6 +55,7 @@ export interface MapProps {
   userCoords?: [number, number] | null;
   selectedBusNo?: string | null;
   theme?: "dark" | "light";
+  isFullscreen?: boolean;
   onMapClick?: (coords: [number, number]) => void;
   onSelectBus?: (bus: BusLocationItem) => void;
   onSelectStop?: (stop: KnownStop) => void;
@@ -140,6 +142,7 @@ export default function Map({
   userCoords,
   selectedBusNo,
   theme = "dark",
+  isFullscreen = false,
   onMapClick,
   onSelectBus,
   onSelectStop,
@@ -179,18 +182,21 @@ export default function Map({
 
   const handleResetNorth = useCallback(() => {
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.flyTo([23.8759, 90.3795], 15, { animate: true, duration: 1.2 });
+      mapInstanceRef.current.flyTo([23.8820, 90.3850], 14, { animate: true, duration: 1.0 });
     }
   }, []);
 
-  // Sync provider on theme change if using default
-  useEffect(() => {
-    if (theme === "light") {
-      setSelectedProviderId((prev) => (prev === "carto_dark" ? "openfreemap_bright" : prev));
-    } else {
-      setSelectedProviderId((prev) => (prev === "openfreemap_bright" ? "carto_dark" : prev));
+  const handleFocusCampus = useCallback(() => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.flyTo([23.8759, 90.3795], 15.5, { animate: true, duration: 1.0 });
     }
-  }, [theme]);
+  }, []);
+
+  const handleFitAllBuses = useCallback(() => {
+    if (!mapInstanceRef.current || busLocations.length === 0) return;
+    const bounds = L.latLngBounds(busLocations.map((b) => [b.latitude, b.longitude] as [number, number]));
+    mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 15, animate: true });
+  }, [busLocations]);
 
   // Persist map engine choice
   const handleEngineSwitch = (engine: "leaflet" | "maplibre") => {
@@ -729,7 +735,7 @@ export default function Map({
       </MapContainer>
 
       {/* --- TOP FLOATING ENGINE & STOPS BAR --- */}
-      <div className="absolute top-3 left-3 right-16 z-[400] flex items-center gap-2 overflow-x-auto no-scrollbar pointer-events-auto">
+      <div className={`absolute ${isFullscreen ? "top-16 left-4 right-96" : "top-3 left-3 right-16"} z-[400] flex items-center gap-2 overflow-x-auto no-scrollbar pointer-events-auto`}>
         {/* Frontend Map Engine Switcher: Leaflet vs MapLibre */}
         <div className={`flex items-center rounded-xl p-1 border shadow-xl backdrop-blur-md shrink-0 ${
           theme === "light" ? "bg-white/95 border-slate-300" : "bg-[#141613]/90 border-[#262a25]"
@@ -798,12 +804,12 @@ export default function Map({
       )}
 
       {/* --- RIGHT FLOATING MAP CONTROLS --- */}
-      <div className="absolute top-16 right-3 z-[400] flex flex-col gap-2 items-end pointer-events-auto">
-        {/* Reset North / Campus View */}
+      <div className={`absolute top-16 ${isFullscreen ? "right-[364px]" : "right-3"} z-[400] flex flex-col gap-2 items-end pointer-events-auto`}>
+        {/* Reset North / Route Corridor */}
         <button
           onClick={handleResetNorth}
-          title="Reset View to Campus (North)"
-          className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-xl border backdrop-blur-md active:scale-95 transition-all ${
+          title="Reset View to Route Corridor"
+          className={`w-9 h-9 rounded-lg flex items-center justify-center shadow-xl border backdrop-blur-md active:scale-95 transition-all ${
             theme === "light"
               ? "bg-white/95 border-slate-300 text-slate-800 hover:bg-slate-100"
               : "bg-[#161916]/90 border-[#262a25] text-slate-200 hover:text-[#facc15]"
@@ -812,11 +818,37 @@ export default function Map({
           <Compass className="w-4 h-4 text-rose-500" />
         </button>
 
+        {/* Center on IUBAT Campus */}
+        <button
+          onClick={handleFocusCampus}
+          title="Center on IUBAT Campus"
+          className={`w-9 h-9 rounded-lg flex items-center justify-center shadow-xl border backdrop-blur-md active:scale-95 transition-all ${
+            theme === "light"
+              ? "bg-white/95 border-slate-300 text-slate-800 hover:bg-slate-100"
+              : "bg-[#161916]/90 border-[#262a25] text-slate-200 hover:text-[#facc15]"
+          }`}
+        >
+          <MapPin className="w-4 h-4 text-amber-500" />
+        </button>
+
+        {/* Fit All Active Buses */}
+        <button
+          onClick={handleFitAllBuses}
+          title="Fit All Active Buses in View"
+          className={`w-9 h-9 rounded-lg flex items-center justify-center shadow-xl border backdrop-blur-md active:scale-95 transition-all ${
+            theme === "light"
+              ? "bg-white/95 border-slate-300 text-slate-800 hover:bg-slate-100"
+              : "bg-[#161916]/90 border-[#262a25] text-slate-200 hover:text-[#facc15]"
+          }`}
+        >
+          <Bus className="w-4 h-4 text-emerald-500" />
+        </button>
+
         {/* GPS Locate Me Button */}
         <button
           onClick={trackMe}
           title="Center on My GPS Location"
-          className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-xl border backdrop-blur-md active:scale-95 transition-all ${
+          className={`w-9 h-9 rounded-lg flex items-center justify-center shadow-xl border backdrop-blur-md active:scale-95 transition-all ${
             theme === "light"
               ? "bg-white/95 border-slate-300 text-slate-800 hover:bg-slate-100"
               : "bg-[#161916]/90 border-[#262a25] text-slate-200 hover:text-[#facc15]"
@@ -826,7 +858,7 @@ export default function Map({
         </button>
 
         {/* Zoom In & Zoom Out Stack */}
-        <div className={`flex flex-col rounded-xl overflow-hidden shadow-xl border backdrop-blur-md ${
+        <div className={`flex flex-col rounded-lg overflow-hidden shadow-xl border backdrop-blur-md ${
           theme === "light"
             ? "bg-white/95 border-slate-300 text-slate-800 divide-y divide-slate-200"
             : "bg-[#161916]/90 border-[#262a25] text-slate-200 divide-y divide-[#262a25]"
@@ -846,47 +878,10 @@ export default function Map({
             <Minus className="w-4 h-4" />
           </button>
         </div>
-
-        {/* Live Traffic Road Overlay Toggle */}
-        <div className={`rounded-xl p-2 shadow-xl border backdrop-blur-md text-[10px] space-y-1.5 ${
-          theme === "light"
-            ? "bg-white/95 border-slate-300 text-slate-900"
-            : "bg-[#161916]/95 border-[#262a25] text-white"
-        }`}>
-          <button
-            onClick={() => setShowTrafficLayer(!showTrafficLayer)}
-            className="flex items-center justify-between w-full gap-2 font-black uppercase tracking-wider text-[9px] hover:opacity-80 transition-opacity"
-            title="Toggle Live Traffic Road Overlay"
-          >
-            <span className="flex items-center gap-1">
-              <Activity className="w-3 h-3 text-amber-500" />
-              <span>Traffic</span>
-            </span>
-            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black ${
-              showTrafficLayer
-                ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
-                : "bg-slate-500/20 text-slate-400"
-            }`}>
-              {showTrafficLayer ? "ON" : "OFF"}
-            </span>
-          </button>
-
-          <div className="flex items-center gap-1 text-[8px] font-bold">
-            <span className="flex items-center gap-0.5 text-emerald-500">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> &gt;30
-            </span>
-            <span className="flex items-center gap-0.5 text-amber-500">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> 15-30
-            </span>
-            <span className="flex items-center gap-0.5 text-rose-500">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> &lt;15
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* --- FLOATING MAP STUDIO & TILE PROVIDER SWITCHER --- */}
-      <div className="absolute bottom-5 left-4 z-[400]">
+      <div className={`absolute bottom-5 ${isFullscreen ? "left-28" : "left-4"} z-[400]`}>
         <div className="relative">
           <button
             onClick={() => setShowLayerStudio(!showLayerStudio)}

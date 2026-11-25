@@ -1,7 +1,19 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, X, Send, Sparkles, Loader2 } from "lucide-react";
+import { X, Send, Sparkles, Loader2 } from "lucide-react";
+
+function BotSmileIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="14" rx="4" />
+      <path d="M8 18l-2 3 4-3" fill="currentColor" stroke="none" />
+      <line x1="9" y1="9" x2="9" y2="11.5" />
+      <line x1="15" y1="9" x2="15" y2="11.5" />
+      <path d="M8.5 14c1 1.2 2.2 1.7 3.5 1.7s2.5-.5 3.5-1.7" />
+    </svg>
+  );
+}
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -200,7 +212,7 @@ export default function UBusChatbot({ theme = "dark" }: UBusChatbotProps) {
         title="UBus AI Assistant"
         className="ml-auto w-11 h-11 rounded-lg bg-[#facc15] hover:bg-[#eab308] text-black shadow-xl shadow-yellow-500/25 flex items-center justify-center active:scale-95 transition-all border border-yellow-300"
       >
-        {isOpen ? <X className="w-5 h-5" /> : <MessageSquare className="w-5 h-5 stroke-[2.2]" />}
+        {isOpen ? <X className="w-5 h-5" /> : <BotSmileIcon />}
       </button>
     </div>
   );

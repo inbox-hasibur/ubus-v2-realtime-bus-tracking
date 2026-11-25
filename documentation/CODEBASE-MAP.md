@@ -11,7 +11,8 @@ src/
 │   ├── page.tsx                # Main SPA router: TopNavbar + DesktopDashboard / Mobile Map + Modals
 │   ├── driver/page.tsx         # Standalone /driver route wrapping DriverCockpit + theme toggle
 │   ├── api/traffic/route.ts    # POST/GET telemetry ingestion for ESP32 GPS & YOLO vehicle counts
-│   └── api/chat/route.ts       # POST Gemini-powered UBus AI Assistant endpoint (with local fallback)
+│   ├── api/chat/route.ts       # POST Gemini-powered UBus AI Assistant endpoint (with local fallback)
+│   └── api/scan-schedule/route.ts # POST Gemini Vision routine image OCR endpoint
 ├── components/
 │   ├── TopNavbar.tsx           # Elevated sticky header, live clock, theme toggle, mobile drawer
 │   ├── MobileBottomNav.tsx     # Mobile 5-slot bottom nav bar with raised center Track FAB

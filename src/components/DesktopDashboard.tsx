@@ -224,6 +224,7 @@ export default function DesktopDashboard({
               userCoords={userCoords}
               selectedBusNo={selectedBusNo}
               theme={theme}
+              isFullscreen={true}
               onMapClick={onMapClick}
               onSelectBus={onSelectBus}
               onSelectStop={onSelectStop}

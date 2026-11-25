@@ -2,6 +2,17 @@
 
 All notable changes to **UBUS V2** are documented in this file.
 
+## [2.0.4] - 2026-11-26
+
+### Added
+- **Class Schedule Image Scan & Student ID Login (`ClassSchedule.tsx`, `/api/scan-schedule`)**: Added passwordless Student ID login (e.g. `22303089`) with per-ID saved schedules, routine image upload with Gemini Vision OCR auto-detect, and an always-available routine image viewer modal.
+- **Map Navigation Controls (`Map.tsx`)**: Added Focus Campus (`MapPin`) and Fit All Active Buses (`Bus`) controls.
+
+### Changed
+- **Chatbot Icon (`UBusChatbot.tsx`)**: Replaced generic message icon with a custom two-eye + smile chatbot SVG icon.
+- **Fullscreen Map Overlap Fix (`Map.tsx`, `DesktopDashboard.tsx`)**: Offset top-left, bottom-left, and right map controls when `isFullscreen` is active so overlays never collide.
+- Removed the Traffic toggle pill from `Map.tsx`.
+
 ## [2.0.3] - 2026-11-25
 
 ### Added

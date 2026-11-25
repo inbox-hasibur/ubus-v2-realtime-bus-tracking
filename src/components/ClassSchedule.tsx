@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ChevronDown, Clock, Bell } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronDown, Clock, Bell, Upload, Image as ImageIcon, Loader2, X, UserCheck, LogOut } from "lucide-react";
 
 export interface ClassScheduleItem {
   id: string;
@@ -25,7 +25,40 @@ interface ClassScheduleProps {
 }
 
 export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) {
-  const [classes, setClasses] = useState<ClassScheduleItem[]>(INITIAL_CLASSES);
+  const [studentId, setStudentId] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("ubus_class_student_id");
+    }
+    return null;
+  });
+  const [studentIdInput, setStudentIdInput] = useState("");
+
+  const [classes, setClasses] = useState<ClassScheduleItem[]>(() => {
+    if (typeof window !== "undefined") {
+      const activeId = localStorage.getItem("ubus_class_student_id") || "guest";
+      const saved = localStorage.getItem(`ubus_class_schedule_${activeId}`);
+      if (saved) {
+        try {
+          return JSON.parse(saved) as ClassScheduleItem[];
+        } catch {
+          // ignore
+        }
+      }
+    }
+    return INITIAL_CLASSES;
+  });
+
+  const [routineImage, setRoutineImage] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      const activeId = localStorage.getItem("ubus_class_student_id") || "guest";
+      return localStorage.getItem(`ubus_class_image_${activeId}`);
+    }
+    return null;
+  });
+  const [showRoutineModal, setShowRoutineModal] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanStatus, setScanStatus] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [localTheme, setLocalTheme] = useState<"dark" | "light">(() => {
     if (typeof window !== "undefined") {
@@ -46,6 +79,87 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
       window.removeEventListener("set-app-theme", handleThemeChange);
     };
   }, []);
+
+  // Persist schedule changes per Student ID
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const activeId = studentId || "guest";
+      localStorage.setItem(`ubus_class_schedule_${activeId}`, JSON.stringify(classes));
+    }
+  }, [classes, studentId]);
+
+  const handleStudentIdLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleaned = studentIdInput.trim();
+    if (!cleaned) return;
+    setStudentId(cleaned);
+    setStudentIdInput("");
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ubus_class_student_id", cleaned);
+      const saved = localStorage.getItem(`ubus_class_schedule_${cleaned}`);
+      if (saved) {
+        try {
+          setClasses(JSON.parse(saved) as ClassScheduleItem[]);
+        } catch {
+          setClasses(INITIAL_CLASSES);
+        }
+      } else {
+        setClasses(INITIAL_CLASSES);
+      }
+      setRoutineImage(localStorage.getItem(`ubus_class_image_${cleaned}`));
+    }
+    setScanStatus(null);
+  };
+
+  const handleStudentIdLogout = () => {
+    setStudentId(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("ubus_class_student_id");
+      const guestSaved = localStorage.getItem("ubus_class_schedule_guest");
+      setClasses(guestSaved ? (JSON.parse(guestSaved) as ClassScheduleItem[]) : INITIAL_CLASSES);
+      setRoutineImage(localStorage.getItem("ubus_class_image_guest"));
+    }
+    setScanStatus(null);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      setRoutineImage(dataUrl);
+      if (typeof window !== "undefined") {
+        const activeId = studentId || "guest";
+        localStorage.setItem(`ubus_class_image_${activeId}`, dataUrl);
+      }
+
+      setIsScanning(true);
+      setScanStatus("Scanning routine image...");
+      try {
+        const res = await fetch("/api/scan-schedule", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageBase64: dataUrl,
+            mimeType: file.type || "image/png",
+          }),
+        });
+        const data = await res.json();
+        if (Array.isArray(data?.classes) && data.classes.length > 0) {
+          setClasses(data.classes);
+        }
+        setScanStatus(data?.message || "Routine image saved!");
+      } catch {
+        setScanStatus("Routine image saved! You can view it anytime or edit rows manually below.");
+      } finally {
+        setIsScanning(false);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   const isLight = (propTheme || localTheme) === "light";
 
@@ -108,38 +222,126 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
   };
 
   return (
-    <div className={`w-full max-w-xl mx-auto py-6 px-3 sm:px-4 font-sans transition-colors ${
+    <div className={`w-full max-w-xl mx-auto py-4 px-3 sm:px-4 font-sans transition-colors ${
       isLight ? "text-slate-900" : "text-white"
     }`}>
-      {/* Title */}
-      <div className="flex items-center justify-between mb-6">
+      {/* Passwordless Student ID Bar */}
+      <div className={`rounded-lg p-3 mb-4 border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
+        isLight ? "bg-slate-50 border-slate-200" : "bg-[#161916] border-[#262a25]"
+      }`}>
+        {studentId ? (
+          <>
+            <div className="flex items-center gap-2 text-xs font-bold">
+              <UserCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Student ID: <span className="font-black text-[#facc15] bg-black/80 px-2 py-0.5 rounded">{studentId}</span></span>
+            </div>
+            <button
+              type="button"
+              onClick={handleStudentIdLogout}
+              className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border flex items-center gap-1 self-start sm:self-auto ${
+                isLight ? "bg-white border-slate-300 text-slate-700 hover:text-black" : "bg-[#1b1e1a] border-[#2f352d] text-slate-300 hover:text-white"
+              }`}
+            >
+              <LogOut className="w-3 h-3" />
+              <span>Switch ID</span>
+            </button>
+          </>
+        ) : (
+          <form onSubmit={handleStudentIdLogin} className="w-full flex items-center gap-2">
+            <input
+              type="text"
+              value={studentIdInput}
+              onChange={(e) => setStudentIdInput(e.target.value)}
+              placeholder="Enter Student ID (e.g. 22303089)"
+              className={`flex-1 rounded-lg px-3 py-1.5 text-xs outline-none border ${
+                isLight
+                  ? "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-900"
+                  : "bg-[#1b1e1a] border-[#2f352d] text-white placeholder:text-slate-500 focus:border-[#facc15]"
+              }`}
+            />
+            <button
+              type="submit"
+              className="bg-[#facc15] hover:bg-[#eab308] text-black font-black text-xs px-3.5 py-1.5 rounded-lg shrink-0 active:scale-95 transition-all"
+            >
+              Load ID
+            </button>
+          </form>
+        )}
+      </div>
+
+      {/* Title & Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <h1 className={`text-xl sm:text-2xl font-black tracking-tight uppercase ${
           isLight ? "text-slate-900" : "text-white"
         }`}>
           Class Schedule
         </h1>
-        <button
-          onClick={() => setIsAlertActive(!isAlertActive)}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border ${
-            isAlertActive
-              ? "bg-[#facc15] text-black shadow-md shadow-yellow-500/20 border-yellow-400"
-              : isLight
-                ? "bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
-                : "bg-[#161916] border-[#262a25] text-slate-300 hover:text-white"
-          }`}
-        >
-          <Bell className="w-3.5 h-3.5" />
-          <span>{isAlertActive ? "Alerts ON" : "Notify Me"}</span>
-        </button>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isScanning}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all border ${
+              isLight
+                ? "bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200"
+                : "bg-[#161916] border-[#262a25] text-slate-200 hover:text-white"
+            }`}
+          >
+            {isScanning ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#facc15]" /> : <Upload className="w-3.5 h-3.5 text-[#facc15]" />}
+            <span>{isScanning ? "Scanning..." : "Scan Image"}</span>
+          </button>
+
+          {routineImage && (
+            <button
+              type="button"
+              onClick={() => setShowRoutineModal(true)}
+              className="px-3 py-1.5 rounded-lg text-xs font-black bg-[#facc15] hover:bg-[#eab308] text-black flex items-center gap-1.5 active:scale-95 transition-all"
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+              <span>View Image</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => setIsAlertActive(!isAlertActive)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all border ${
+              isAlertActive
+                ? "bg-[#facc15] text-black shadow-md shadow-yellow-500/20 border-yellow-400"
+                : isLight
+                  ? "bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
+                  : "bg-[#161916] border-[#262a25] text-slate-300 hover:text-white"
+            }`}
+          >
+            <Bell className="w-3.5 h-3.5" />
+            <span>{isAlertActive ? "Alerts ON" : "Notify Me"}</span>
+          </button>
+        </div>
       </div>
 
-      {/* --- Schedule Table / Rows (Matching Video 01:05) --- */}
+      {scanStatus && (
+        <div className={`mb-4 px-3 py-2 rounded-lg text-xs font-semibold border ${
+          isLight ? "bg-amber-50 border-amber-200 text-amber-900" : "bg-[#1c201a] border-[#2c3327] text-amber-300"
+        }`}>
+          {scanStatus}
+        </div>
+      )}
+
+      {/* --- Schedule Table / Rows --- */}
       <div className="space-y-2.5 mb-8">
         {classes.map((cls, index) => {
           return (
             <div
               key={cls.id || index}
-              className={`rounded-xl p-3 sm:p-4 flex items-center justify-between gap-2.5 shadow-md transition-all group border ${
+              className={`rounded-lg p-3 sm:p-4 flex items-center justify-between gap-2.5 shadow-md transition-all group border ${
                 isLight
                   ? "bg-white border-slate-200 hover:border-slate-300 shadow-slate-900/5"
                   : "bg-[#161916] border-[#262a25] hover:border-[#383e35]"
@@ -196,8 +398,8 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
         })}
       </div>
 
-      {/* --- Bottom Controls Panel (Matching Video 01:06 - 01:10) --- */}
-      <div className={`rounded-2xl p-4 sm:p-5 shadow-2xl space-y-4 border ${
+      {/* --- Bottom Controls Panel --- */}
+      <div className={`rounded-lg p-4 sm:p-5 shadow-2xl space-y-4 border ${
         isLight
           ? "bg-slate-50 border-slate-200 text-slate-900 shadow-slate-900/5"
           : "bg-[#141613] border-[#262a25] text-white shadow-black/50"
@@ -208,7 +410,7 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
           <div className="flex items-center gap-2">
             <button
               onClick={handleModify}
-              className={`font-black text-xs px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 shrink-0 border ${
+              className={`font-black text-xs px-4 py-2 rounded-lg transition-all shadow-sm active:scale-95 shrink-0 border ${
                 isLight
                   ? "bg-white hover:bg-[#facc15] hover:text-black text-slate-800 border-slate-300"
                   : "bg-[#1b1e1a] hover:bg-[#facc15] hover:text-black text-slate-200 border-[#262a25]"
@@ -217,7 +419,6 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
               Modify
             </button>
 
-            {/* Row Selector Dropdown */}
             <div className="relative">
               <select
                 value={selectedModifyRow}
@@ -229,7 +430,7 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
                     setModifyName(`${classes[idx].code} ${classes[idx].title}`);
                   }
                 }}
-                className={`text-xs font-bold rounded-xl px-3 py-2 pr-7 outline-none appearance-none cursor-pointer border ${
+                className={`text-xs font-bold rounded-lg px-3 py-2 pr-7 outline-none appearance-none cursor-pointer border ${
                   isLight
                     ? "bg-white text-slate-900 border-slate-300"
                     : "bg-[#1b1e1a] text-white border-[#262a25]"
@@ -254,7 +455,7 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
               value={modifyTime}
               onChange={(e) => setModifyTime(e.target.value)}
               placeholder="11:20 AM"
-              className={`w-full rounded-xl px-3 py-2 text-xs outline-none transition-all border ${
+              className={`w-full rounded-lg px-3 py-2 text-xs outline-none transition-all border ${
                 isLight
                   ? "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-amber-500"
                   : "bg-[#1b1e1a] border-[#262a25] text-white placeholder:text-slate-500 focus:border-[#facc15]"
@@ -265,7 +466,7 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
               value={modifyName}
               onChange={(e) => setModifyName(e.target.value)}
               placeholder="Course Code & Name"
-              className={`w-full rounded-xl px-3 py-2 text-xs outline-none transition-all border ${
+              className={`w-full rounded-lg px-3 py-2 text-xs outline-none transition-all border ${
                 isLight
                   ? "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-amber-500"
                   : "bg-[#1b1e1a] border-[#262a25] text-white placeholder:text-slate-500 focus:border-[#facc15]"
@@ -280,7 +481,7 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <button
             onClick={handleAdd}
-            className={`font-black text-xs px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 shrink-0 border ${
+            className={`font-black text-xs px-4 py-2 rounded-lg transition-all shadow-sm active:scale-95 shrink-0 border ${
               isLight
                 ? "bg-white hover:bg-[#facc15] hover:text-black text-slate-800 border-slate-300"
                 : "bg-[#1b1e1a] hover:bg-[#facc15] hover:text-black text-slate-200 border-[#262a25]"
@@ -293,7 +494,7 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
             value={addTime}
             onChange={(e) => setAddTime(e.target.value)}
             placeholder="Time (e.g. 03:00 PM)"
-            className={`flex-1 rounded-xl px-3 py-2 text-xs outline-none transition-all border ${
+            className={`flex-1 rounded-lg px-3 py-2 text-xs outline-none transition-all border ${
               isLight
                 ? "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-amber-500"
                 : "bg-[#1b1e1a] border-[#262a25] text-white placeholder:text-slate-500 focus:border-[#facc15]"
@@ -304,7 +505,7 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
             value={addName}
             onChange={(e) => setAddName(e.target.value)}
             placeholder="Course Name (e.g. CSC 440 AI)"
-            className={`flex-1 rounded-xl px-3 py-2 text-xs outline-none transition-all border ${
+            className={`flex-1 rounded-lg px-3 py-2 text-xs outline-none transition-all border ${
               isLight
                 ? "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-amber-500"
                 : "bg-[#1b1e1a] border-[#262a25] text-white placeholder:text-slate-500 focus:border-[#facc15]"
@@ -318,7 +519,7 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
         <div className="flex items-center gap-2">
           <button
             onClick={handleDelete}
-            className={`font-black text-xs px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 shrink-0 border ${
+            className={`font-black text-xs px-4 py-2 rounded-lg transition-all shadow-sm active:scale-95 shrink-0 border ${
               isLight
                 ? "bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border-red-200"
                 : "bg-[#2e1414] hover:bg-red-600 text-red-300 hover:text-white border-red-500/20"
@@ -330,7 +531,7 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
             <select
               value={selectedDeleteRow}
               onChange={(e) => setSelectedDeleteRow(e.target.value)}
-              className={`text-xs font-bold rounded-xl px-3 py-2 pr-7 outline-none appearance-none cursor-pointer border ${
+              className={`text-xs font-bold rounded-lg px-3 py-2 pr-7 outline-none appearance-none cursor-pointer border ${
                 isLight
                   ? "bg-white text-slate-900 border-slate-300"
                   : "bg-[#1b1e1a] text-white border-[#262a25]"
@@ -348,8 +549,41 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-2.5 pointer-events-none" />
           </div>
         </div>
-
       </div>
+
+      {/* Saved Routine Image Viewer Modal */}
+      {showRoutineModal && routineImage && (
+        <div
+          onClick={() => setShowRoutineModal(false)}
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`relative max-w-2xl w-full rounded-lg border p-3 shadow-2xl ${
+              isLight ? "bg-white border-slate-200 text-slate-900" : "bg-[#161916] border-[#262a25] text-white"
+            }`}
+          >
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-black/10 dark:border-white/10">
+              <span className="text-xs font-black uppercase tracking-wider">
+                Saved Routine Image {studentId ? `(${studentId})` : ""}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowRoutineModal(false)}
+                className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={routineImage}
+              alt="Saved Class Routine"
+              className="w-full max-h-[75vh] object-contain rounded"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

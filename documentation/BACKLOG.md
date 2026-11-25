@@ -25,6 +25,7 @@
 - [x] Full-bleed edge-to-edge `DesktopDashboard`, elevated `TopNavbar`, and `MobileBottomNav` with raised center Track FAB
 - [x] Fixed `MobileBottomNav` position, Guest/Auth state sync, minimal `LandingPage`, and reliable `Leaflet 2D` default
 - [x] `Google Streets` default across all modes, grayed-out unavailable layers, CARTO GL 3D vector fix, and Gemini AI chatbot (`/api/chat`)
+- [x] Fullscreen map overlap fix, extra map navigation controls, custom bot-smile icon, passwordless Student ID login & routine image scan (`/api/scan-schedule`)
 
 ## Sprint 4 — Next Up (Pending)
 - [ ] Hydrate `BusSchedule.tsx` directly from Supabase `routes` table instead of `DEFAULT_BUS_ROUTES` fallback
