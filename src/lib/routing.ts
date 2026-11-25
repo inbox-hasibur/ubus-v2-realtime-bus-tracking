@@ -57,12 +57,45 @@ export interface OverpassTransitStop {
 
 export const MAP_PROVIDERS = [
   {
+    id: 'google',
+    name: 'Google Streets',
+    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google Maps',
+    isVector: false,
+    disabled: false,
+  },
+  {
+    id: 'osm',
+    name: 'OpenStreetMap Standard (OSM)',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors',
+    isVector: false,
+    disabled: false,
+  },
+  {
+    id: 'google_satellite',
+    name: 'Google Satellite & Hybrid',
+    url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google Maps Satellite',
+    isVector: false,
+    disabled: false,
+  },
+  {
+    id: 'google_terrain',
+    name: 'Google Terrain',
+    url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google Maps Terrain',
+    isVector: false,
+    disabled: false,
+  },
+  {
     id: 'openfreemap_liberty',
     name: 'OpenFreeMap Liberty (Vector 3D)',
     url: 'https://tiles.openfreemap.org/styles/liberty/{z}/{x}/{y}.png',
     vectorStyle: 'https://tiles.openfreemap.org/styles/liberty',
     attribution: '&copy; OpenFreeMap & OpenStreetMap contributors',
     isVector: true,
+    disabled: true,
   },
   {
     id: 'openfreemap_bright',
@@ -71,6 +104,7 @@ export const MAP_PROVIDERS = [
     vectorStyle: 'https://tiles.openfreemap.org/styles/bright',
     attribution: '&copy; OpenFreeMap & OpenStreetMap',
     isVector: true,
+    disabled: true,
   },
   {
     id: 'openfreemap_positron',
@@ -79,6 +113,7 @@ export const MAP_PROVIDERS = [
     vectorStyle: 'https://tiles.openfreemap.org/styles/positron',
     attribution: '&copy; OpenFreeMap & OpenStreetMap',
     isVector: true,
+    disabled: true,
   },
   {
     id: 'carto_dark',
@@ -86,6 +121,7 @@ export const MAP_PROVIDERS = [
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     attribution: '&copy; CARTO & OpenStreetMap',
     isVector: false,
+    disabled: true,
   },
   {
     id: 'carto',
@@ -93,34 +129,7 @@ export const MAP_PROVIDERS = [
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     attribution: '&copy; CARTO & OpenStreetMap',
     isVector: false,
-  },
-  {
-    id: 'osm',
-    name: 'OpenStreetMap Standard (OSM)',
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenStreetMap contributors',
-    isVector: false,
-  },
-  {
-    id: 'google',
-    name: 'Google Streets',
-    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-    attribution: '&copy; Google Maps',
-    isVector: false,
-  },
-  {
-    id: 'google_satellite',
-    name: 'Google Satellite & Hybrid',
-    url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-    attribution: '&copy; Google Maps Satellite',
-    isVector: false,
-  },
-  {
-    id: 'google_terrain',
-    name: 'Google Terrain',
-    url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
-    attribution: '&copy; Google Maps Terrain',
-    isVector: false,
+    disabled: true,
   },
 ];
 

@@ -2,6 +2,15 @@
 
 All notable changes to **UBUS V2** are documented in this file.
 
+## [2.0.3] - 2026-11-25
+
+### Added
+- **UBus AI Assistant (`UBusChatbot.tsx`, `/api/chat`)**: Added a floating bottom-right Gemini-powered transit chatbot with built-in IUBAT fallback responses.
+
+### Changed
+- **Google Streets Default**: Set `Google Streets` (`google`) as the default map provider in all modes (`dark` & `light`), kept the 4 working layers (`Google Streets`, `OSM`, `Google Satellite & Hybrid`, `Google Terrain`), and grayed out unavailable API-gated layers in Layer Studio.
+- **MapLibre 3D Vector Fix**: Switched `MapLibreView.tsx` to CARTO free GL vector styles (`dark-matter-gl-style` / `voyager-gl-style`) so 3D vector mode renders roads reliably.
+
 ## [2.0.2] - 2026-11-25
 
 ### Changed

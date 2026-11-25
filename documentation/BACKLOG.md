@@ -24,6 +24,7 @@
 - [x] Fix mobile `100dvh` height, theme-aware mobile drawer/cards, live clock/date, and 720p fullscreen fit
 - [x] Full-bleed edge-to-edge `DesktopDashboard`, elevated `TopNavbar`, and `MobileBottomNav` with raised center Track FAB
 - [x] Fixed `MobileBottomNav` position, Guest/Auth state sync, minimal `LandingPage`, and reliable `Leaflet 2D` default
+- [x] `Google Streets` default across all modes, grayed-out unavailable layers, CARTO GL 3D vector fix, and Gemini AI chatbot (`/api/chat`)
 
 ## Sprint 4 — Next Up (Pending)
 - [ ] Hydrate `BusSchedule.tsx` directly from Supabase `routes` table instead of `DEFAULT_BUS_ROUTES` fallback

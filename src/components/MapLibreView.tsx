@@ -23,7 +23,7 @@ export default function MapLibreView({
   userCoords,
   selectedBusNo = "12",
   theme = "dark",
-  styleUrl = "https://tiles.openfreemap.org/styles/liberty",
+  styleUrl = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
   onMapClick,
   onSelectBus,
   onSelectStop,
@@ -54,14 +54,6 @@ export default function MapLibreView({
     mapRef.current = map;
 
     map.on("load", () => {
-      try {
-        map.getCanvas().style.filter =
-          theme === "dark"
-            ? "invert(92%) hue-rotate(180deg) brightness(0.95) contrast(0.95)"
-            : "none";
-      } catch {
-        // ignore
-      }
       // 3D Building Extrusion layer
       try {
         const layers = map.getStyle().layers;

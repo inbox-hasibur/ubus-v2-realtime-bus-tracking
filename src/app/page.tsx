@@ -15,6 +15,7 @@ import Settings from "@/components/Settings";
 import DriverCockpit from "@/components/DriverCockpit";
 import AuthModal from "@/components/AuthModal";
 import NoticeBoardModal from "@/components/NoticeBoardModal";
+import UBusChatbot from "@/components/UBusChatbot";
 import { supabase } from "@/lib/supabase";
 import { 
   fetchOSRMRoute, 
@@ -591,6 +592,9 @@ export default function App() {
         onClose={() => setIsNoticeBoardOpen(false)}
         theme={appTheme}
       />
+
+      {/* --- Bottom-Right Gemini AI Transit Assistant --- */}
+      <UBusChatbot theme={appTheme} />
 
     </div>
   );

@@ -150,10 +150,8 @@ export default function Map({
   // 2. Routing Engine: OSRM Road Geometry vs Valhalla Map-Matching
   const [routingEngine, setRoutingEngine] = useState<"osrm" | "valhalla">("osrm");
 
-  // 3. Tile & Vector Data Provider
-  const [selectedProviderId, setSelectedProviderId] = useState<string>(() => {
-    return theme === "light" ? "carto" : "carto_dark";
-  });
+  // 3. Tile & Vector Data Provider (Google Streets default in all modes)
+  const [selectedProviderId, setSelectedProviderId] = useState<string>("google");
 
   const [busLocations, setBusLocations] = useState<BusLocationItem[]>(DEFAULT_CAMPUS_BUSES);
   const [isClient, setIsClient] = useState(false);
@@ -421,22 +419,17 @@ export default function Map({
 
     const toggleLayerHandler = () => {
       setSelectedProviderId((prev) => {
-        if (prev === 'carto_dark') return 'openfreemap_liberty';
-        if (prev === 'openfreemap_liberty') return 'google';
-        if (prev === 'google') return 'carto';
-        if (prev === 'carto') return 'osm';
-        return 'carto_dark';
+        if (prev === 'google') return 'osm';
+        if (prev === 'osm') return 'google_satellite';
+        if (prev === 'google_satellite') return 'google_terrain';
+        return 'google';
       });
     };
     window.addEventListener('toggle-map-layer', toggleLayerHandler);
 
-    const setThemeHandler = (e: Event) => {
-      const custom = e as CustomEvent<"dark" | "light">;
-      if (custom.detail === "light") {
-        setSelectedProviderId("carto");
-      } else {
-        setSelectedProviderId("carto_dark");
-      }
+    const setThemeHandler = () => {
+      // Keep Google Streets as default across all modes
+      setSelectedProviderId((prev) => prev || "google");
     };
     window.addEventListener('set-map-theme', setThemeHandler);
 
@@ -523,7 +516,11 @@ export default function Map({
           userCoords={userCoords}
           selectedBusNo={selectedBusNo}
           theme={theme}
-          styleUrl={activeProvider.vectorStyle || "https://tiles.openfreemap.org/styles/liberty"}
+          styleUrl={
+            theme === "dark"
+              ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+              : "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+          }
           onMapClick={onMapClick}
           onSelectBus={onSelectBus}
           onSelectStop={onSelectStop}
@@ -951,22 +948,32 @@ export default function Map({
                   {MAP_PROVIDERS.map((provider) => (
                     <button
                       key={provider.id}
+                      disabled={provider.disabled}
                       onClick={() => {
+                        if (provider.disabled) return;
                         setSelectedProviderId(provider.id);
                         setShowLayerStudio(false);
                       }}
                       className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-between ${
-                        selectedProviderId === provider.id
+                        provider.disabled
+                          ? "opacity-40 cursor-not-allowed text-slate-400"
+                          : selectedProviderId === provider.id
                           ? theme === "light"
-                            ? "bg-slate-900 text-white font-black"
-                            : "bg-[#facc15] text-black font-black"
+                            ? "bg-slate-900 text-white"
+                            : "bg-[#facc15] text-black"
                           : theme === "light"
-                            ? "text-slate-700 hover:bg-slate-100"
-                            : "text-slate-300 hover:bg-[#1f241d] hover:text-white"
+                            ? "hover:bg-slate-100 text-slate-700"
+                            : "hover:bg-white/5 text-slate-300"
                       }`}
                     >
                       <span className="truncate">{provider.name}</span>
-                      {selectedProviderId === provider.id && <Check className="w-3 h-3 shrink-0 ml-1" />}
+                      {provider.disabled ? (
+                        <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-slate-500/20 text-slate-400 shrink-0 ml-1">
+                          API Req
+                        </span>
+                      ) : selectedProviderId === provider.id ? (
+                        <Check className="w-3 h-3 shrink-0 ml-1" />
+                      ) : null}
                     </button>
                   ))}
                 </div>

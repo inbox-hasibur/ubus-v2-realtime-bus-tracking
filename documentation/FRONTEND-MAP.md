@@ -43,6 +43,7 @@ Quick reference for fixing layout, responsiveness, theme, and visual bugs.
 | Mobile Bottom Nav | `src/components/MobileBottomNav.tsx` | Fixed `bottom-0 z-40` 5-slot bar (`Map`, `Buses`, raised yellow Track FAB, `Classes`, `Settings`) |
 | Desktop Frame | `src/components/DesktopDashboard.tsx` | Full-bleed `w-full` block, sidebar (`w-16 md:w-20 lg:w-52`), Guest/Auth header, map (`h-[calc(100vh-215px)]`) |
 | About & Team | `src/components/LandingPage.tsx` | Minimal theme-aware overview, 3-card highlights, testimonials, team, contact form |
+| AI Assistant | `src/components/UBusChatbot.tsx` | Floating bottom-right (`bottom-20 md:bottom-5 right-3 md:right-5 z-40`) Gemini chat widget |
 | Mobile Search Bar | `src/components/LocationSearchBar.tsx` | `max-w-md`, mode switcher (`Current` / `Destination`), stop dropdown |
 | Mobile Bottom Card | `src/components/BottomBusCard.tsx` | `max-w-md`, expandable 3-col telemetry drawer (`Speed`, `Seats`, `AI Flow`) |
 | Mobile Trip Drawer | `src/components/RightPanel.tsx` | Slide-over panel triggered by `SlidersHorizontal` button |
