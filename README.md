@@ -24,6 +24,12 @@
       <img src="https://img.shields.io/badge/Launch%20UBUS%20V2-bus--iubat.vercel.app-2563EB?style=for-the-badge&logo=vercel&logoColor=white" alt="Launch UBUS V2 Web App" />
     </a>
   </p>
+
+  <br />
+
+  <a href="https://bus-iubat.vercel.app">
+    <img src="public/preview.png" alt="UBUS V2 Web App Interface Preview" width="900" style="border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);" />
+  </a>
 </div>
 
 ---
