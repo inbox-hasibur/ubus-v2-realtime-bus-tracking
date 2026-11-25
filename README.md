@@ -21,46 +21,46 @@
 
   <p>
     <a href="https://bus-iubat.vercel.app">
-      <img src="https://img.shields.io/badge/%F0%9F%9A%8C%20Launch%20UBUS%20V2-bus--iubat.vercel.app-2563EB?style=for-the-badge&logo=vercel&logoColor=white" alt="Launch UBUS V2 Web App" />
+      <img src="https://img.shields.io/badge/Launch%20UBUS%20V2-bus--iubat.vercel.app-2563EB?style=for-the-badge&logo=vercel&logoColor=white" alt="Launch UBUS V2 Web App" />
     </a>
   </p>
 </div>
 
 ---
 
-## ⚡ Why UBUS V2? (Problem & Solution)
+## Why UBUS V2? (Problem & Solution)
 
 - **The Problem:** Students waiting at campus or city bus stops often have no idea where their bus is, whether it is stuck in traffic, or when the next shuttle departs. Static PDFs and guesswork lead to missed buses and wasted time.
 - **The Solution:** UBUS V2 streams live bus GPS coordinates via Supabase Realtime onto an interactive 3D MapLibre / Leaflet map, calculates road-accurate ETAs using OSRM, and pairs transit tracking with personalized student class schedules and a dedicated driver cockpit.
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- 🚌 **Real-Time Bus Tracking:** Live GPS markers with bus numbers, speed, and instant Supabase Realtime updates.
-- 🗺️ **Dual Map Engine (3D & 2D):** Switch seamlessly between MapLibre GL 3D vector maps (OpenFreeMap Liberty, Bright, Positron) and Leaflet raster layers (CartoDB Dark Matter, Voyager, OSM).
-- 🚦 **Road Routing & Traffic Telemetry:** Turn-by-turn OSRM road paths, Overpass API transit stop discovery, and `/api/traffic` ingestion for ESP32 GPS & ESP32-CAM YOLO data.
-- 📅 **Smart Bus Schedules:** Searchable route timetables, live status indicators, and stop-by-stop pickup sequences.
-- 🏫 **Student Class Schedule:** Day-wise class routine manager with CRUD support and time-left class notifications.
-- 🧑‍✈️ **Driver Cockpit (`/driver`):** Dedicated driver interface for broadcasting live location and managing active trips.
-- 🌙 **Dark / Light Mode & Mobile Ready:** Responsive desktop dashboard and fullscreen mobile map mode.
+- **Real-Time Bus Tracking:** Live GPS markers with bus numbers, speed, and instant Supabase Realtime updates.
+- **Dual Map Engine (3D & 2D):** Switch seamlessly between MapLibre GL 3D vector maps (OpenFreeMap Liberty, Bright, Positron) and Leaflet raster layers (CartoDB Dark Matter, Voyager, OSM).
+- **Road Routing & Traffic Telemetry:** Turn-by-turn OSRM road paths, Overpass API transit stop discovery, and `/api/traffic` ingestion for ESP32 GPS & ESP32-CAM YOLO data.
+- **Smart Bus Schedules:** Searchable route timetables, live status indicators, and stop-by-stop pickup sequences.
+- **Student Class Schedule:** Day-wise class routine manager with CRUD support and time-left class notifications.
+- **Driver Cockpit (`/driver`):** Dedicated driver interface for broadcasting live location and managing active trips.
+- **Dark / Light Mode & Mobile Ready:** Responsive desktop dashboard and fullscreen mobile map mode.
 
 ---
 
-## 📡 Core Modules & Views
+## Core Modules & Views
 
 | Module | Best For | Key Capabilities |
 | :--- | :--- | :--- |
-| **🗺️ Live Map Dashboard** | Students & commuters | Real-time bus markers, GPS "Track Near Me", ETA & route navigation |
-| **🧑‍✈️ Driver Cockpit** | Bus drivers (`/driver`) | Live GPS telemetry broadcasting and trip status controls |
-| **📅 Bus Schedule** | Daily route planning | Searchable bus routes, departure times, and live status |
-| **🏫 Class Schedule** | Student time management | ID-based class routine, CRUD modal, and class countdown alerts |
-| **📢 Notice Board & Auth** | Campus updates & access | Transport announcements and student/admin authentication |
-| **🚦 Traffic API** | IoT & telemetry (`/api/traffic`) | Accepts ESP32 GPS and ESP32-CAM YOLO vehicle count payloads |
+| **Live Map Dashboard** | Students & commuters | Real-time bus markers, GPS "Track Near Me", ETA & route navigation |
+| **Driver Cockpit** | Bus drivers (`/driver`) | Live GPS telemetry broadcasting and trip status controls |
+| **Bus Schedule** | Daily route planning | Searchable bus routes, departure times, and live status |
+| **Class Schedule** | Student time management | ID-based class routine, CRUD modal, and class countdown alerts |
+| **Notice Board & Auth** | Campus updates & access | Transport announcements and student/admin authentication |
+| **Traffic API** | IoT & telemetry (`/api/traffic`) | Accepts ESP32 GPS and ESP32-CAM YOLO vehicle count payloads |
 
 ---
 
-## 🛠️ Tech Stack & Key Technologies
+## Tech Stack & Key Technologies
 
 | Domain / Layer | Technology | Role in UBUS V2 |
 | :--- | :--- | :--- |
@@ -75,7 +75,7 @@
 
 ---
 
-## 💻 Quick Start & Local Setup
+## Quick Start & Local Setup
 
 ```bash
 # 1. Clone the repository
@@ -97,7 +97,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 - **[Changelog](documentation/CHANGELOG.md)** — Version history and release notes.
 - **[Developer Guide](documentation/DEVELOPER_GUIDE.md)** — Architecture, project structure, and implementation notes.
@@ -105,7 +105,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 📄 License
+## License
 
 - **Author & Maintainer:** [IncodeBD / Hasibur](https://github.com/inbox-hasibur)
 - **Live App:** [bus-iubat.vercel.app](https://bus-iubat.vercel.app)
