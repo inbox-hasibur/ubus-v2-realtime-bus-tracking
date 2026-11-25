@@ -34,7 +34,7 @@ export default function BottomBusCard({
   return (
     <div className="w-full max-w-md mx-auto select-none transition-all duration-300">
       {/* --- Main Floating Bottom Card --- */}
-      <div className={`backdrop-blur-xl border rounded-2xl p-2.5 sm:p-3.5 shadow-2xl transition-colors ${
+      <div className={`backdrop-blur-xl border rounded-lg p-2.5 sm:p-3 shadow-xl transition-colors ${
         isLight
           ? "bg-white/95 border-slate-200 text-slate-900"
           : "bg-[#141613]/95 border-[#262a25] text-white"

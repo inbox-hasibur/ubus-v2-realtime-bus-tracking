@@ -2,6 +2,15 @@
 
 All notable changes to **UBUS V2** are documented in this file.
 
+## [2.0.2] - 2026-11-25
+
+### Changed
+- **Fixed Mobile Bottom Nav**: Locked `MobileBottomNav` (`fixed bottom-0 z-40`) so it stays visible while scrolling any mobile view.
+- **Guest & Auth Flow**: Removed hardcoded `"Manjur Matin"` fallback; unauthenticated users now see `"Live Campus Bus Tracker"` and a `"Guest • Sign in"` trigger synced with Supabase Auth.
+- **Minimal About Us (`LandingPage.tsx`)**: Redesigned About Us with a minimal, theme-aware layout and removed the chunky bus graphic.
+- **Reliable Map Default**: Set `Leaflet 2D` as the default map engine in `Map.tsx` so street maps load reliably out of the box.
+- **Cleaner TopNavbar & Reduced Roundness**: Removed duplicate time/date pills from `TopNavbar.tsx` and tightened card/button corners (`rounded-lg`).
+
 ## [2.0.1] - 2026-11-25
 
 ### Added

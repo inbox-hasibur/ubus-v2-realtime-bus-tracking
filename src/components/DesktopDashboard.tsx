@@ -27,7 +27,7 @@ import Settings from "@/components/Settings";
 import DriverCockpit from "@/components/DriverCockpit";
 import { RouteResult, KnownStop, KNOWN_STOPS } from "@/lib/routing";
 import { BusLocationItem } from "@/components/Map";
-import { signOutUser } from "@/lib/supabase";
+import { supabase, signOutUser } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 
 const MapView = dynamic(() => import("@/components/Map"), { 
@@ -57,6 +57,7 @@ interface DesktopDashboardProps {
   onMapClick?: (coords: [number, number]) => void;
   onOpenDriver?: () => void;
   onOpenNotices?: () => void;
+  onOpenAuth?: (mode: "login" | "signup") => void;
 }
 
 export default function DesktopDashboard({
@@ -77,6 +78,7 @@ export default function DesktopDashboard({
   onMapClick,
   onOpenDriver,
   onOpenNotices,
+  onOpenAuth,
 }: DesktopDashboardProps) {
   // Theme State: "dark" or "light" (persisted in localStorage)
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -101,13 +103,25 @@ export default function DesktopDashboard({
     onTabChange?.(tab);
   };
 
-  // User Profile
-  const [storedUser] = useState(() => {
+  // User Profile (null when browsing as guest)
+  const [storedUser, setStoredUser] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("student_id") || "Manjur Matin";
+      return localStorage.getItem("student_id");
     }
-    return "Manjur Matin";
+    return null;
   });
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        const name =
+          (data.user.user_metadata?.full_name as string | undefined) ||
+          data.user.email?.split("@")[0] ||
+          "Student";
+        setStoredUser(name);
+      }
+    });
+  }, []);
 
   const [now, setNow] = useState<Date>(() => new Date());
 
@@ -126,11 +140,13 @@ export default function DesktopDashboard({
     .toUpperCase();
 
   const userInitials = storedUser
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "MM";
+    ? storedUser
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "G";
 
   // Toggle Theme handler
   const toggleTheme = useCallback(() => {
@@ -788,19 +804,34 @@ export default function DesktopDashboard({
             </button>
           </div>
 
-          {/* Log Out */}
-          <button
-            onClick={handleLogout}
-            title="Log Out"
-            className={`w-full flex items-center justify-center lg:justify-start gap-3 px-3 lg:px-3.5 py-2.5 rounded-xl text-xs font-black transition-all ${
-              theme === "light"
-                ? "text-red-600 hover:bg-red-50"
-                : "text-[#facc15] hover:bg-[#1f241d]"
-            }`}
-          >
-            <LogOut className="w-4 h-4 shrink-0" />
-            <span className="hidden lg:inline">Log Out</span>
-          </button>
+          {/* Log Out / Sign In */}
+          {storedUser ? (
+            <button
+              onClick={handleLogout}
+              title="Log Out"
+              className={`w-full flex items-center justify-center lg:justify-start gap-3 px-3 lg:px-3.5 py-2.5 rounded-lg text-xs font-black transition-all ${
+                theme === "light"
+                  ? "text-red-600 hover:bg-red-50"
+                  : "text-[#facc15] hover:bg-[#1f241d]"
+              }`}
+            >
+              <LogOut className="w-4 h-4 shrink-0" />
+              <span className="hidden lg:inline">Log Out</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => onOpenAuth?.("login")}
+              title="Sign In"
+              className={`w-full flex items-center justify-center lg:justify-start gap-3 px-3 lg:px-3.5 py-2.5 rounded-lg text-xs font-black transition-all ${
+                theme === "light"
+                  ? "text-slate-700 hover:bg-slate-100"
+                  : "text-[#facc15] hover:bg-[#1f241d]"
+              }`}
+            >
+              <LogOut className="w-4 h-4 shrink-0 rotate-180" />
+              <span className="hidden lg:inline">Sign In</span>
+            </button>
+          )}
         </aside>
 
         {/* --- Right Main Area --- */}
@@ -881,20 +912,36 @@ export default function DesktopDashboard({
 
             {/* User Greeting & Initials Avatar */}
             <div className="flex items-center gap-2.5 shrink-0">
-              <span className={`hidden sm:inline text-xs font-bold truncate max-w-[150px] ${
-                theme === "light" ? "text-slate-800" : "text-slate-200"
-              }`}>
-                {storedUser}
-              </span>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#facc15] to-[#eab308] flex items-center justify-center text-black font-black text-xs border border-white/20 shadow-md">
-                {userInitials}
-              </div>
+              {storedUser ? (
+                <>
+                  <span className={`hidden sm:inline text-xs font-bold truncate max-w-[150px] ${
+                    theme === "light" ? "text-slate-800" : "text-slate-200"
+                  }`}>
+                    {storedUser}
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#facc15] to-[#eab308] flex items-center justify-center text-black font-black text-xs border border-white/20 shadow-md">
+                    {userInitials}
+                  </div>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth?.("login")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                    theme === "light"
+                      ? "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800"
+                      : "bg-[#1c201a] hover:bg-[#252b21] border-[#2c3327] text-slate-200"
+                  }`}
+                >
+                  Guest • Sign in
+                </button>
+              )}
             </div>
           </div>
 
           {/* TAB 1: DASHBOARD VIEW */}
           {activeTab === "dashboard" && (
-            <div className="pt-5 space-y-5">
+            <div className="pt-4 space-y-4">
               
               {/* Welcome Row with Fullscreen Toggle and Actions */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -902,7 +949,7 @@ export default function DesktopDashboard({
                   <h1 className={`text-xl sm:text-2xl font-black tracking-tight ${
                     theme === "light" ? "text-slate-900" : "text-white"
                   }`}>
-                    Welcome, {storedUser}
+                    {storedUser ? `Welcome, ${storedUser}` : "Live Campus Bus Tracker"}
                   </h1>
                   <p className={`text-[11px] mt-0.5 ${
                     theme === "light" ? "text-slate-500" : "text-slate-400"

@@ -323,8 +323,9 @@ export default function App() {
         
         {/* --- VIEW 1: ABOUT & PRODUCT OVERVIEW PAGE (Former Landing Page) --- */}
         {(activeTab === "about" || activeTab === "home") && (
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 md:pb-0">
             <LandingPage
+              theme={appTheme}
               onTrackNow={() => {
                 setActiveTab("dashboard");
                 handleStartNavigation();
@@ -363,6 +364,7 @@ export default function App() {
                   setActiveTab("driver");
                 }}
                 onOpenNotices={() => setIsNoticeBoardOpen(true)}
+                onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
               />
 
               {/* Shared Desktop Footer */}
@@ -510,9 +512,9 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Bottom Floating Card (hidden in mobile fullscreen mode) */}
+                  {/* Bottom Floating Card (hidden in mobile fullscreen mode, clears fixed MobileBottomNav) */}
                   {!isMobileFullscreenMap && (
-                    <div className="absolute bottom-3 left-3 right-3 z-20 pointer-events-auto">
+                    <div className="absolute bottom-20 left-3 right-3 z-20 pointer-events-auto">
                       <BottomBusCard
                         data={bottomBusData}
                         theme={appTheme}
@@ -539,41 +541,42 @@ export default function App() {
               )}
 
               {activeTab === "schedule" && (
-                <div className={`h-full overflow-y-auto ${appTheme === "light" ? "bg-slate-100" : "bg-[#141613]"} custom-scrollbar p-3 transition-colors`}>
+                <div className={`h-full overflow-y-auto ${appTheme === "light" ? "bg-slate-100" : "bg-[#141613]"} custom-scrollbar p-3 pb-24 transition-colors`}>
                   <BusSchedule theme={appTheme} />
                 </div>
               )}
 
               {activeTab === "class" && (
-                <div className={`h-full overflow-y-auto ${appTheme === "light" ? "bg-slate-100" : "bg-[#141613]"} custom-scrollbar p-3 transition-colors`}>
+                <div className={`h-full overflow-y-auto ${appTheme === "light" ? "bg-slate-100" : "bg-[#141613]"} custom-scrollbar p-3 pb-24 transition-colors`}>
                   <ClassSchedule theme={appTheme} />
                 </div>
               )}
 
               {activeTab === "settings" && (
-                <div className={`h-full overflow-y-auto ${appTheme === "light" ? "bg-slate-100" : "bg-[#141613]"} custom-scrollbar p-3 transition-colors`}>
+                <div className={`h-full overflow-y-auto ${appTheme === "light" ? "bg-slate-100" : "bg-[#141613]"} custom-scrollbar p-3 pb-24 transition-colors`}>
                   <Settings theme={appTheme} />
                 </div>
               )}
 
               {activeTab === "driver" && (
-                <div className={`h-full overflow-y-auto ${appTheme === "light" ? "bg-slate-100" : "bg-[#141613]"} custom-scrollbar p-3 transition-colors`}>
+                <div className={`h-full overflow-y-auto ${appTheme === "light" ? "bg-slate-100" : "bg-[#141613]"} custom-scrollbar p-3 pb-24 transition-colors`}>
                   <DriverCockpit theme={appTheme} onBack={() => setActiveTab("dashboard")} />
                 </div>
               )}
               </div>
-
-              <MobileBottomNav
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                onCenterTrack={handleUseMyLocation}
-                theme={appTheme}
-              />
             </div>
           </>
         )}
 
       </main>
+
+      {/* Persistent Mobile Bottom Navigation (stays fixed on scroll across all mobile views) */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onCenterTrack={handleUseMyLocation}
+        theme={appTheme}
+      />
 
       {/* --- Exact Figma Auth Modal (orca-paste-1792644520640-12d13ef8) --- */}
       <AuthModal

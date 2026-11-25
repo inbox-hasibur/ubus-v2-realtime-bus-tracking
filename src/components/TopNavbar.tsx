@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bus, ChevronDown, ChevronUp, Clock, Calendar, Bell, Sun, Moon } from "lucide-react";
+import { Bus, ChevronDown, ChevronUp, Bell, Sun, Moon } from "lucide-react";
 import { signOutUser } from "@/lib/supabase";
 
 interface TopNavbarProps {
@@ -60,21 +60,6 @@ export default function TopNavbar({
     }
     return null;
   });
-  const [now, setNow] = useState<Date>(() => new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 30000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const currentTime = now.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-  const currentDate = now
-    .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
-    .toUpperCase();
 
   const handleNav = (tab: string) => {
     setActiveTab(tab);
@@ -254,28 +239,14 @@ export default function TopNavbar({
             </button>
           )}
 
-          {/* Desktop Status Indicators */}
+          {/* Desktop Theme & Notice Controls (Time/Date live in Dashboard) */}
           <div className="hidden lg:flex items-center gap-2">
-            <div className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold border ${
-              isLight ? "bg-slate-100 border-slate-200 text-slate-800" : "bg-[#171a16] border-[#262a25] text-slate-200"
-            }`}>
-              <Clock className="w-3.5 h-3.5 text-[#facc15]" />
-              <span>{currentTime}</span>
-            </div>
-
-            <div className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold border ${
-              isLight ? "bg-slate-100 border-slate-200 text-slate-800" : "bg-[#171a16] border-[#262a25] text-slate-200"
-            }`}>
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              <span>{currentDate}</span>
-            </div>
-
             {/* Desktop Theme Switcher Button */}
             <button
               type="button"
               onClick={toggleTheme}
               title={`Switch to ${isLight ? "Dark" : "Light"} Mode`}
-              className={`w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer transition-all active:scale-95 border ${
+              className={`w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all active:scale-95 border ${
                 isLight
                   ? "bg-slate-100 border-slate-200 text-indigo-600 hover:bg-slate-200"
                   : "bg-[#171a16] border-[#262a25] text-[#facc15] hover:bg-[#252a23]"
@@ -288,7 +259,7 @@ export default function TopNavbar({
               type="button"
               onClick={() => onOpenNotices?.()}
               title="Campus Transit Notices & Alerts"
-              className={`relative w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer transition-colors active:scale-95 border ${
+              className={`relative w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors active:scale-95 border ${
                 isLight
                   ? "bg-slate-100 border-slate-200 text-slate-700 hover:text-amber-600"
                   : "bg-[#171a16] border-[#262a25] text-slate-300 hover:text-[#facc15]"

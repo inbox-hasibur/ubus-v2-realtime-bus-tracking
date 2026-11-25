@@ -37,7 +37,7 @@ export default function LocationSearchBar({
   return (
     <div className="relative w-full max-w-md mx-auto select-none">
       {/* --- Search Bar Container --- */}
-      <div className={`backdrop-blur-xl border rounded-2xl p-1.5 sm:p-2 shadow-2xl flex items-center gap-2 transition-colors ${
+      <div className={`backdrop-blur-xl border rounded-lg p-1.5 sm:p-2 shadow-xl flex items-center gap-2 transition-colors ${
         isLight
           ? "bg-white/95 border-slate-200 text-slate-900"
           : "bg-[#141613]/95 border-[#262a25] text-white"

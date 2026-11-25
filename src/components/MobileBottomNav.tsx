@@ -30,7 +30,7 @@ export default function MobileBottomNav({
 
   return (
     <nav
-      className={`md:hidden shrink-0 w-full border-t px-2 pt-1.5 pb-2 grid grid-cols-5 items-center relative z-30 select-none transition-colors ${
+      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 w-full border-t px-2 pt-1.5 pb-2 grid grid-cols-5 items-center select-none transition-colors ${
         isLight
           ? "bg-white/95 backdrop-blur-xl border-slate-200 shadow-[0_-4px_20px_rgba(15,23,42,0.06)]"
           : "bg-[#121411]/95 backdrop-blur-xl border-[#242823] shadow-[0_-4px_24px_rgba(0,0,0,0.45)]"

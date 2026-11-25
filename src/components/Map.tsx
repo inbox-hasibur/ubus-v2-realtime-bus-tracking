@@ -144,13 +144,8 @@ export default function Map({
   onSelectBus,
   onSelectStop,
 }: MapProps) {
-  // 1. Map Frontend Engine: Leaflet 2D vs MapLibre GL 3D Vector
-  const [mapEngine, setMapEngine] = useState<"leaflet" | "maplibre">(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("ubus_map_engine") as "leaflet" | "maplibre") || "leaflet";
-    }
-    return "leaflet";
-  });
+  // 1. Map Frontend Engine: Leaflet 2D (reliable default) vs MapLibre GL 3D Vector
+  const [mapEngine, setMapEngine] = useState<"leaflet" | "maplibre">("leaflet");
 
   // 2. Routing Engine: OSRM Road Geometry vs Valhalla Map-Matching
   const [routingEngine, setRoutingEngine] = useState<"osrm" | "valhalla">("osrm");
