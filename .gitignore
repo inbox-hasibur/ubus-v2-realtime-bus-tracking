@@ -34,9 +34,14 @@ yarn-error.log*
 .env*
 !.env.example
 
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Large media files
+public/*.mp4
+public/*.webm

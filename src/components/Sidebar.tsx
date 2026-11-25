@@ -39,6 +39,13 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
           <NavItem icon={<Clock className="w-4 h-4" />} label="Bus Schedule" active={activeTab === "schedule"} onClick={() => setActiveTab("schedule")} collapsed={isCollapsed} />
           <NavItem icon={<Calendar className="w-4 h-4" />} label="Class Schedule" active={activeTab === "class"} onClick={() => setActiveTab("class")} collapsed={isCollapsed} />
           <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} collapsed={isCollapsed} />
+          <NavItem 
+            icon={<Bus className="w-4 h-4 text-yellow-500" />} 
+            label="Driver App" 
+            active={false} 
+            onClick={() => { window.location.href = "/driver"; }} 
+            collapsed={isCollapsed} 
+          />
         </nav>
 
         {/* User Profile Section */}
@@ -47,12 +54,16 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
             ${isCollapsed ? 'justify-center w-8 h-8 mx-auto' : 'justify-center w-8 h-8 mx-auto lg:w-full lg:h-auto lg:p-2 lg:justify-start'}`}>
             
             <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-[8px] shrink-0 shadow-sm ring-1 ring-white">
-              HR
+              {typeof window !== "undefined" && localStorage.getItem("student_id") ? "ST" : "UB"}
             </div>
             
             <div className={`overflow-hidden transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'w-0 lg:w-auto lg:opacity-100 pl-2.5'}`}>
-              <p className="text-[10px] font-bold truncate text-slate-800">Hasibur</p>
-              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">ID: 2230</p>
+              <p className="text-[10px] font-bold truncate text-slate-800">
+                {typeof window !== "undefined" && localStorage.getItem("student_id") ? "Student" : "Guest User"}
+              </p>
+              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">
+                ID: {typeof window !== "undefined" && localStorage.getItem("student_id") ? localStorage.getItem("student_id") : "Visitor"}
+              </p>
             </div>
           </div>
         </div>
