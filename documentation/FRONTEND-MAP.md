@@ -6,10 +6,10 @@ Quick reference for fixing layout, responsiveness, theme, and visual bugs.
 
 | Breakpoint | Active Shell | Source |
 | :--- | :--- | :--- |
-| `< 768px` (Mobile) | Fullscreen Map + `LocationSearchBar` + `BottomBusCard` + `RightPanel` drawer | `src/app/page.tsx` (`md:hidden`, `h-[calc(100dvh-53px)]`) |
-| `>= 768px` (`md:` Tablet) | `DesktopDashboard` windowed frame with `w-20` icon-only sidebar | `src/components/DesktopDashboard.tsx` |
-| `>= 1024px` (`lg:` Desktop) | `DesktopDashboard` with `w-60` full sidebar + 12-col grid (8 map / 4 form) | `src/components/DesktopDashboard.tsx` |
-| Fullscreen (`F` / button) | Full-bleed map (`h-[calc(100vh-110px)] min-h-[540px] max-h-[820px]`) + floating card | `src/components/DesktopDashboard.tsx` |
+| `< 768px` (Mobile) | Fullscreen Map + `LocationSearchBar` + `BottomBusCard` + `MobileBottomNav` + `RightPanel` | `src/app/page.tsx` (`md:hidden`, `h-[calc(100dvh-53px)]`) |
+| `>= 768px` (`md:` Tablet) | Full-bleed `DesktopDashboard` with `w-20` icon-only sidebar | `src/components/DesktopDashboard.tsx` |
+| `>= 1024px` (`lg:` Desktop) | Full-bleed `DesktopDashboard` with `w-52` sidebar + 12-col grid (8/9 map, 4/3 form) | `src/components/DesktopDashboard.tsx` |
+| Fullscreen (`F` / button) | Edge-to-edge map (`h-[calc(100vh-53px)] min-h-[540px]`) + floating card | `src/components/DesktopDashboard.tsx` |
 
 ## 2. Theme System (Dark / Light Sync)
 
@@ -39,8 +39,9 @@ Quick reference for fixing layout, responsiveness, theme, and visual bugs.
 | Area | File | Key Elements / Classes |
 | :--- | :--- | :--- |
 | Global CSS & Map Markers | `src/app/globals.css` | `.bus-marker-badge`, `.bus-marker-pointer`, `.user-gps-marker`, `.user-pulse-ring` |
-| Header & Mobile Menu | `src/components/TopNavbar.tsx` | Sticky header, live clock/date, `menu` pill, mobile drawer (`max-w-sm rounded-2xl`) |
-| Desktop Frame | `src/components/DesktopDashboard.tsx` | Sidebar (`w-16 md:w-20 lg:w-60`), map (`h-[420px] md:h-[480px] lg:h-[540px]`), form |
+| Header & Mobile Menu | `src/components/TopNavbar.tsx` | Elevated sticky header (`shadow-md`/`shadow-lg`), live clock/date, `menu` pill, mobile drawer |
+| Mobile Bottom Nav | `src/components/MobileBottomNav.tsx` | 5-slot bottom bar (`Map`, `Buses`, raised yellow Track FAB, `Classes`, `Settings`) |
+| Desktop Frame | `src/components/DesktopDashboard.tsx` | Full-bleed `w-full` block, sidebar (`w-16 md:w-20 lg:w-52`), map (`h-[calc(100vh-215px)]`) |
 | Mobile Search Bar | `src/components/LocationSearchBar.tsx` | `max-w-md`, mode switcher (`Current` / `Destination`), stop dropdown |
 | Mobile Bottom Card | `src/components/BottomBusCard.tsx` | `max-w-md`, expandable 3-col telemetry drawer (`Speed`, `Seats`, `AI Flow`) |
 | Mobile Trip Drawer | `src/components/RightPanel.tsx` | Slide-over panel triggered by `SlidersHorizontal` button |

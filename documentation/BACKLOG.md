@@ -22,6 +22,7 @@
 - [x] Update `README.md` with custom `public/icon.svg` and 2% rounded `public/preview.png`
 - [x] Replace default favicon with `src/app/icon.svg` & `src/app/layout.tsx` metadata
 - [x] Fix mobile `100dvh` height, theme-aware mobile drawer/cards, live clock/date, and 720p fullscreen fit
+- [x] Full-bleed edge-to-edge `DesktopDashboard`, elevated `TopNavbar`, and `MobileBottomNav` with raised center Track FAB
 
 ## Sprint 4 — Next Up (Pending)
 - [ ] Hydrate `BusSchedule.tsx` directly from Supabase `routes` table instead of `DEFAULT_BUS_ROUTES` fallback

@@ -2,6 +2,18 @@
 
 All notable changes to **UBUS V2** are documented in this file.
 
+## [2.0.1] - 2026-11-25
+
+### Added
+- **Mobile Bottom Navigation (`MobileBottomNav.tsx`)**: Added a 5-slot mobile bottom bar with Map, Buses, a raised circular yellow Track FAB, Classes, and Settings.
+- **Full-Bleed Desktop Layout**: Elevated `TopNavbar` with backdrop blur/shadow and made `DesktopDashboard` edge-to-edge (`w-full`, no rounded outer box) with larger responsive map height.
+- **Documentation Sync Rule (`AGENTS.md`)**: Enforced automatic updates to `CHANGELOG.md`, `BACKLOG.md`, `CODEBASE-MAP.md`, and `FRONTEND-MAP.md` before every push.
+
+### Fixed
+- Synced `TopNavbar` tabs with `DesktopDashboard` sidebar state.
+- Fixed Light Mode map tiles in `Map.tsx` to use CartoDB Voyager (`carto`) for reliable street rendering, and added dark-mode canvas filtering in `MapLibreView.tsx`.
+- Unified `TopNavbar` bus logo, `src/app/icon.svg` favicon, and `public/ubus-logo.svg` README logo.
+
 ## [2.0.0] - 2026-11-25
 
 ### Added

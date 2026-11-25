@@ -12,8 +12,9 @@ src/
 │   ├── driver/page.tsx         # Standalone /driver route wrapping DriverCockpit + theme toggle
 │   └── api/traffic/route.ts    # POST/GET telemetry ingestion for ESP32 GPS & YOLO vehicle counts
 ├── components/
-│   ├── TopNavbar.tsx           # Global sticky header, live clock, theme toggle, mobile drawer
-│   ├── DesktopDashboard.tsx    # Desktop windowed + fullscreen dashboard, sidebar, map & trip form
+│   ├── TopNavbar.tsx           # Elevated sticky header, live clock, theme toggle, mobile drawer
+│   ├── MobileBottomNav.tsx     # Mobile 5-slot bottom nav bar with raised center Track FAB
+│   ├── DesktopDashboard.tsx    # Full-bleed edge-to-edge + fullscreen dashboard, sidebar, map & trip form
 │   ├── Map.tsx                 # Dual-engine map wrapper (Leaflet 2D + MapLibre 3D), Supabase sub, GPS
 │   ├── MapLibreView.tsx        # MapLibre GL 3D vector renderer + custom DOM markers
 │   ├── RightPanel.tsx          # Mobile slide-over trip info & navigation form
@@ -58,7 +59,7 @@ src/
 ## 3. Knowledge Graph
 
 - `src/app/page.tsx`
-  - imports: `TopNavbar`, `LandingPage`, `DesktopDashboard`, `LocationSearchBar`, `BottomBusCard`, `BusSchedule`, `ClassSchedule`, `RightPanel`, `Settings`, `DriverCockpit`, `AuthModal`, `NoticeBoardModal`, `Map` (dynamic `ssr: false`), `supabase`, `routing.ts` (`fetchOSRMRoute`, `geocodeLocation`, `calculateDistanceKm`)
+  - imports: `TopNavbar`, `MobileBottomNav`, `LandingPage`, `DesktopDashboard`, `LocationSearchBar`, `BottomBusCard`, `BusSchedule`, `ClassSchedule`, `RightPanel`, `Settings`, `DriverCockpit`, `AuthModal`, `NoticeBoardModal`, `Map` (dynamic `ssr: false`), `supabase`, `routing.ts` (`fetchOSRMRoute`, `geocodeLocation`, `calculateDistanceKm`)
 - `src/components/DesktopDashboard.tsx`
   - imports: `Map` (dynamic `ssr: false`), `BusSchedule`, `ClassSchedule`, `Settings`, `DriverCockpit`, `routing.ts` (`KNOWN_STOPS`, `RouteResult`, `KnownStop`), `supabase.ts` (`signOutUser`)
 - `src/components/Map.tsx`

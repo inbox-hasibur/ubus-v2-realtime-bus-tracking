@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState, useEffect, useCallback } from "react";
 import TopNavbar from "@/components/TopNavbar";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import LandingPage from "@/components/LandingPage";
 import DesktopDashboard from "@/components/DesktopDashboard";
 import LocationSearchBar from "@/components/LocationSearchBar";
@@ -364,8 +365,8 @@ export default function App() {
                 onOpenNotices={() => setIsNoticeBoardOpen(true)}
               />
 
-              {/* Shared Desktop Footer (from 2. Desktop Dashboard 1.1) */}
-              <footer className={`mt-auto py-10 px-6 max-w-[1800px] mx-auto w-full border-t transition-colors ${
+              {/* Shared Desktop Footer */}
+              <footer className={`mt-auto py-8 px-6 lg:px-10 w-full border-t transition-colors ${
                 appTheme === "light"
                   ? "border-slate-200 text-slate-700"
                   : "border-[#242823] text-white"
@@ -441,9 +442,10 @@ export default function App() {
             </div>
 
             {/* ========================================================
-                B. MOBILE VIEWPORT (md:hidden) -> Matching Android Fullscreen Figma
+                B. MOBILE VIEWPORT (md:hidden) -> Fullscreen Map + Bottom Nav
                ======================================================== */}
             <div className="flex md:hidden flex-col flex-1 h-[calc(100dvh-53px)] overflow-hidden">
+              <div className="flex-1 min-h-0 relative overflow-hidden">
               {activeTab === "dashboard" && (
                 <div className="relative h-full w-full overflow-hidden">
                   <div className="absolute inset-0 z-0">
@@ -559,6 +561,14 @@ export default function App() {
                   <DriverCockpit theme={appTheme} onBack={() => setActiveTab("dashboard")} />
                 </div>
               )}
+              </div>
+
+              <MobileBottomNav
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                onCenterTrack={handleUseMyLocation}
+                theme={appTheme}
+              />
             </div>
           </>
         )}

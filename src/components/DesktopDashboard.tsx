@@ -193,13 +193,13 @@ export default function DesktopDashboard({
   // =========================================================================
   if (isFullscreen) {
     return (
-      <div className={`w-full max-w-[1800px] mx-auto px-3 sm:px-5 lg:px-6 py-4 select-none font-sans transition-colors duration-300 ${
+      <div className={`w-full select-none font-sans transition-colors duration-300 ${
         theme === "light" ? "text-slate-900" : "text-white"
       }`}>
-        <div className={`relative w-full h-[calc(100vh-110px)] min-h-[540px] max-h-[820px] rounded-2xl overflow-hidden shadow-2xl border transition-colors ${
+        <div className={`relative w-full h-[calc(100vh-53px)] min-h-[540px] overflow-hidden transition-colors ${
           theme === "light"
-            ? "bg-slate-100 border-slate-300"
-            : "bg-[#141613] border-[#262a25]"
+            ? "bg-slate-100"
+            : "bg-[#141613]"
         }`}>
           {/* Main Leaflet Map taking full container */}
           <div className="absolute inset-0 z-0">
@@ -627,15 +627,15 @@ export default function DesktopDashboard({
   // Matching 2. Desktop Dashboard 1.1 - Dark (1).png (Supports Light & Dark)
   // =========================================================================
   return (
-    <div className={`w-full max-w-[1800px] mx-auto px-3 sm:px-5 lg:px-6 py-4 select-none font-sans transition-colors duration-300 ${
+    <div className={`w-full flex-1 flex flex-col select-none font-sans transition-colors duration-300 ${
       theme === "light" ? "text-slate-900" : "text-white"
     }`}>
       
-      {/* Main Dashboard Container Frame */}
-      <div className={`border rounded-2xl overflow-hidden shadow-2xl flex min-h-[600px] lg:min-h-[680px] transition-colors duration-300 ${
+      {/* Main Full-Bleed Dashboard Block (No Rounded Outer Box, Edge-to-Edge) */}
+      <div className={`w-full flex-1 flex min-h-[calc(100vh-53px)] transition-colors duration-300 ${
         theme === "light"
-          ? "bg-white border-slate-200"
-          : "bg-[#141613] border-[#262a25]"
+          ? "bg-white"
+          : "bg-[#141613]"
       }`}>
         
         {/* --- Left Sidebar (Icon on Tablet md:, Full on Desktop lg:) --- */}
@@ -956,7 +956,7 @@ export default function DesktopDashboard({
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                 
                 {/* Map Card */}
-                <div className={`lg:col-span-8 xl:col-span-9 h-[440px] md:h-[500px] lg:h-[580px] xl:h-[630px] rounded-xl overflow-hidden shadow-xl relative transition-all border ${
+                <div className={`lg:col-span-8 xl:col-span-9 h-[480px] md:h-[540px] lg:h-[calc(100vh-215px)] min-h-[520px] rounded-xl overflow-hidden shadow-xl relative transition-all border ${
                   theme === "light"
                     ? "bg-slate-100 border-slate-200"
                     : "bg-[#121411] border-[#262a25]"

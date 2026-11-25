@@ -157,7 +157,7 @@ export default function Map({
 
   // 3. Tile & Vector Data Provider
   const [selectedProviderId, setSelectedProviderId] = useState<string>(() => {
-    return theme === "light" ? "openfreemap_bright" : "carto_dark";
+    return theme === "light" ? "carto" : "carto_dark";
   });
 
   const [busLocations, setBusLocations] = useState<BusLocationItem[]>(DEFAULT_CAMPUS_BUSES);
@@ -438,7 +438,7 @@ export default function Map({
     const setThemeHandler = (e: Event) => {
       const custom = e as CustomEvent<"dark" | "light">;
       if (custom.detail === "light") {
-        setSelectedProviderId("openfreemap_bright");
+        setSelectedProviderId("carto");
       } else {
         setSelectedProviderId("carto_dark");
       }

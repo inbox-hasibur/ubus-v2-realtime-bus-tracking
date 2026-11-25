@@ -8,14 +8,19 @@ Follow these rules whenever making changes to this repository.
    - Every time you finish making changes in the codebase, verify the build/checks pass, then stage, commit, and push them to `origin/upgrade`.
    - **Never** merge or push directly to `main` unless explicitly asked by the user.
 
-2. **Merging & Production Deployment**
+2. **Mandatory Documentation Sync (Before Every Push)**
+   - After any code or UI change, always update the `documentation/` folder before committing and pushing:
+     - Update `documentation/CHANGELOG.md` and `documentation/BACKLOG.md`.
+     - Regenerate/update `documentation/CODEBASE-MAP.md` and `documentation/FRONTEND-MAP.md` to reflect the latest file tree, components, data flow, and UI structure.
+
+3. **Merging & Production Deployment**
    - Only merge `upgrade` into `main` when the user explicitly instructs you to merge into `main`.
    - If the user asks to **deploy / make live in production** (e.g. "production e live koro", "push to production"), automatically:
-     1. Commit and push all changes to `upgrade`.
+     1. Update documentation, commit, and push all changes to `upgrade`.
      2. Merge `upgrade` into `main`.
      3. Push `main` to `origin` so the production deployment triggers.
 
-3. **Commit Message Rules (Strict)**
+4. **Commit Message Rules (Strict)**
    - **Never** use colons (`:`) in commit messages.
    - **Never** use conventional-commit prefixes or AI-style tags such as `feat`, `fix`, `chore`, `refactor`, `docs`, `style`, `test`, `build`, or `perf`.
    - Write short, natural, human-style commit messages of **2 to 5 words** that clearly describe what changed.

@@ -98,11 +98,11 @@ export default function TopNavbar({
 
   return (
     <>
-      {/* --- Top Navigation Header Bar --- */}
-      <header className={`sticky top-0 z-50 w-full border-b px-3 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between select-none transition-colors duration-200 ${
+      {/* --- Top Navigation Header Bar (Elevated) --- */}
+      <header className={`sticky top-0 z-50 w-full border-b px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between select-none transition-colors duration-200 ${
         isLight
-          ? "bg-white border-slate-200 text-slate-900 shadow-sm"
-          : "bg-[#0e100f] border-[#242823] text-white"
+          ? "bg-white/95 backdrop-blur-md border-slate-200 text-slate-900 shadow-md shadow-slate-900/5"
+          : "bg-[#0e100f]/95 backdrop-blur-md border-[#242823] text-white shadow-lg shadow-black/40"
       }`}>
         
         {/* Left: Brand Logo (Always links directly to Live Map) */}
