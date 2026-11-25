@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/globe.svg" alt="UBUS V2 Logo" width="84" height="84" />
+  <img src="public/icon.svg" alt="UBUS V2 Logo" width="84" height="84" />
   <h1>UBUS V2</h1>
 
   <p>

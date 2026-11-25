@@ -13,8 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UBUS V2 | Real-time Bus Tracking", // এখানে নাম বদলে দাও
+  title: "UBUS V2 | Real-time Bus Tracking",
   description: "University Bus Tracking System - UBUS V2",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
