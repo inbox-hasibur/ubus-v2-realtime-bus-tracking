@@ -1,46 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <defs>
-    <linearGradient id="ubus-bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FDE047" />
-      <stop offset="55%" stop-color="#FACC15" />
-      <stop offset="100%" stop-color="#EAB308" />
-    </linearGradient>
-    <linearGradient id="ubus-glass" x1="64" y1="36" x2="64" y2="66" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#334155" />
-      <stop offset="100%" stop-color="#0F172A" />
+    <linearGradient id="ubus-nav-bg" x1="0" y1="64" x2="64" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#EAB308" />
+      <stop offset="100%" stop-color="#FACC15" />
     </linearGradient>
   </defs>
-
-  <!-- Rounded App Badge -->
-  <rect width="128" height="128" rx="30" fill="url(#ubus-bg)" />
-  <rect x="3" y="3" width="122" height="122" rx="27" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="2" />
-
-  <!-- Live GPS Pulse Dot (Top Right) -->
-  <circle cx="99" cy="28" r="10" fill="#111827" fill-opacity="0.14" />
-  <circle cx="99" cy="28" r="5.5" fill="#16A34A" stroke="#FEF08A" stroke-width="2" />
-
-  <!-- Side Mirrors -->
-  <rect x="20" y="45" width="7" height="18" rx="3.5" fill="#111827" />
-  <rect x="101" y="45" width="7" height="18" rx="3.5" fill="#111827" />
-
-  <!-- Bus Wheels -->
-  <rect x="32" y="92" width="14" height="13" rx="4" fill="#111827" />
-  <rect x="82" y="92" width="14" height="13" rx="4" fill="#111827" />
-
-  <!-- Bus Body -->
-  <rect x="28" y="28" width="72" height="68" rx="16" fill="#111827" />
-
-  <!-- Top Destination Sign -->
-  <rect x="46" y="33" width="36" height="5" rx="2.5" fill="#FACC15" fill-opacity="0.85" />
-
-  <!-- Panoramic Windshield -->
-  <rect x="35" y="42" width="58" height="26" rx="7" fill="url(#ubus-glass)" stroke="#FACC15" stroke-opacity="0.25" stroke-width="1.5" />
-  <path d="M41 47 L53 47 L43 62 L38 62 Z" fill="#FFFFFF" fill-opacity="0.12" />
-
-  <!-- Headlights -->
-  <circle cx="40" cy="80" r="5" fill="#FEF08A" />
-  <circle cx="88" cy="80" r="5" fill="#FEF08A" />
-
-  <!-- Center Grille -->
-  <rect x="52" y="77" width="24" height="6" rx="3" fill="#334155" />
+  <rect width="64" height="64" rx="16" fill="url(#ubus-nav-bg)" />
+  <g transform="translate(14, 14) scale(1.5)" stroke="#000000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M8 6v6" />
+    <path d="M15 6v6" />
+    <path d="M2 12h19.6" />
+    <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" />
+    <circle cx="7" cy="18" r="2" />
+    <path d="M9 18h5" />
+    <circle cx="16" cy="18" r="2" />
+  </g>
 </svg>

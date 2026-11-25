@@ -536,10 +536,16 @@ export default function Map({
 
         {/* Engine Switcher Overlay Pill on MapLibre */}
         <div className="absolute top-3 left-3 z-30 flex items-center gap-2 pointer-events-auto">
-          <div className="bg-[#141613]/90 backdrop-blur-md border border-[#262a25] rounded-xl p-1 flex items-center gap-1 shadow-2xl">
+          <div className={`backdrop-blur-md border rounded-xl p-1 flex items-center gap-1 shadow-2xl ${
+            theme === "light"
+              ? "bg-white/95 border-slate-200"
+              : "bg-[#141613]/90 border-[#262a25]"
+          }`}>
             <button
               onClick={() => handleEngineSwitch("leaflet")}
-              className="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition-all"
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                theme === "light" ? "text-slate-600 hover:text-black" : "text-slate-300 hover:text-white"
+              }`}
             >
               Leaflet 2D
             </button>

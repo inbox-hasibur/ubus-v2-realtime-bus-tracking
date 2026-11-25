@@ -54,30 +54,54 @@ const DEFAULT_NOTICES: NoticeItem[] = [
 interface NoticeBoardModalProps {
   isOpen: boolean;
   onClose: () => void;
+  theme?: "dark" | "light";
 }
 
-export default function NoticeBoardModal({ isOpen, onClose }: NoticeBoardModalProps) {
+export default function NoticeBoardModal({ isOpen, onClose, theme = "dark" }: NoticeBoardModalProps) {
   if (!isOpen) return null;
+  const isLight = theme === "light";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#161916] border border-[#262a25] rounded-2xl p-6 sm:p-7 shadow-2xl text-white select-none">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`relative w-full max-w-lg border rounded-2xl p-6 sm:p-7 shadow-2xl select-none ${
+          isLight
+            ? "bg-white border-slate-200 text-slate-900"
+            : "bg-[#161916] border-[#262a25] text-white"
+        }`}
+      >
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#242823]">
+        <div className={`flex items-center justify-between pb-4 border-b ${
+          isLight ? "border-slate-200" : "border-[#242823]"
+        }`}>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#28230b] border border-[#4c4217] flex items-center justify-center text-[#facc15]">
+            <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${
+              isLight
+                ? "bg-amber-50 border-amber-200 text-amber-600"
+                : "bg-[#28230b] border-[#4c4217] text-[#facc15]"
+            }`}>
               <Bell className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-black text-white">Notice Board & Alerts</h3>
+              <h3 className={`text-base font-black ${isLight ? "text-slate-900" : "text-white"}`}>
+                Notice Board & Alerts
+              </h3>
               <p className="text-[10px] text-slate-400">Live service notices & university transit updates</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+              isLight
+                ? "bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-black"
+                : "bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white"
+            }`}
           >
             <X className="w-4 h-4" />
           </button>
@@ -88,7 +112,11 @@ export default function NoticeBoardModal({ isOpen, onClose }: NoticeBoardModalPr
           {DEFAULT_NOTICES.map((notice) => (
             <div
               key={notice.id}
-              className="bg-[#1d211c] border border-[#2f352d] hover:border-[#3d453a] rounded-xl p-4 transition-all group"
+              className={`border rounded-xl p-4 transition-all group ${
+                isLight
+                  ? "bg-slate-50 border-slate-200 hover:border-slate-300"
+                  : "bg-[#1d211c] border-[#2f352d] hover:border-[#3d453a]"
+              }`}
             >
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border ${notice.badgeColor}`}>
@@ -97,7 +125,11 @@ export default function NoticeBoardModal({ isOpen, onClose }: NoticeBoardModalPr
                 <span className="text-[10px] text-slate-400 font-bold">{notice.timestamp}</span>
               </div>
 
-              <h4 className="text-xs sm:text-sm font-black text-white group-hover:text-[#facc15] transition-colors mb-1">
+              <h4 className={`text-xs sm:text-sm font-black transition-colors mb-1 ${
+                isLight
+                  ? "text-slate-900 group-hover:text-amber-600"
+                  : "text-white group-hover:text-[#facc15]"
+              }`}>
                 {notice.title}
               </h4>
 

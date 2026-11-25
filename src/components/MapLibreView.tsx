@@ -54,6 +54,14 @@ export default function MapLibreView({
     mapRef.current = map;
 
     map.on("load", () => {
+      try {
+        map.getCanvas().style.filter =
+          theme === "dark"
+            ? "invert(92%) hue-rotate(180deg) brightness(0.95) contrast(0.95)"
+            : "none";
+      } catch {
+        // ignore
+      }
       // 3D Building Extrusion layer
       try {
         const layers = map.getStyle().layers;

@@ -119,7 +119,11 @@ export default function App() {
       if (custom.detail) setAppTheme(custom.detail);
     };
     window.addEventListener("set-map-theme", themeHandler);
-    return () => window.removeEventListener("set-map-theme", themeHandler);
+    window.addEventListener("set-app-theme", themeHandler);
+    return () => {
+      window.removeEventListener("set-map-theme", themeHandler);
+      window.removeEventListener("set-app-theme", themeHandler);
+    };
   }, []);
 
   // Use live GPS as Start Point
@@ -294,7 +298,9 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#141613] font-sans antialiased text-white select-none">
+    <div className={`flex flex-col min-h-screen font-sans antialiased select-none transition-colors duration-300 ${
+      appTheme === "light" ? "bg-[#f8fafc] text-slate-900" : "bg-[#141613] text-white"
+    }`}>
       
       {/* Top Navbar */}
       <TopNavbar
@@ -337,6 +343,8 @@ export default function App() {
               appTheme === "light" ? "bg-[#f8fafc] text-slate-900" : "bg-[#141613] text-white"
             }`}>
               <DesktopDashboard
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
                 navigationRoute={navigationRoute}
                 userCoords={userCoords}
                 selectedBusNo={selectedBusNo}
@@ -357,7 +365,7 @@ export default function App() {
               />
 
               {/* Shared Desktop Footer (from 2. Desktop Dashboard 1.1) */}
-              <footer className={`mt-auto py-10 px-6 max-w-7xl mx-auto w-full border-t transition-colors ${
+              <footer className={`mt-auto py-10 px-6 max-w-[1800px] mx-auto w-full border-t transition-colors ${
                 appTheme === "light"
                   ? "border-slate-200 text-slate-700"
                   : "border-[#242823] text-white"
@@ -568,6 +576,7 @@ export default function App() {
       <NoticeBoardModal
         isOpen={isNoticeBoardOpen}
         onClose={() => setIsNoticeBoardOpen(false)}
+        theme={appTheme}
       />
 
     </div>

@@ -40,6 +40,8 @@ const MapView = dynamic(() => import("@/components/Map"), {
 });
 
 interface DesktopDashboardProps {
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
   navigationRoute?: RouteResult | null;
   userCoords?: [number, number] | null;
   selectedBusNo?: string | null;
@@ -58,6 +60,8 @@ interface DesktopDashboardProps {
 }
 
 export default function DesktopDashboard({
+  activeTab: externalTab,
+  onTabChange,
   navigationRoute,
   userCoords,
   selectedBusNo = "12",
@@ -89,8 +93,13 @@ export default function DesktopDashboard({
   const [showFullscreenMenu, setShowFullscreenMenu] = useState(false);
   const [fullscreenModal, setFullscreenModal] = useState<"bus" | "class" | null>(null);
 
-  // Active Sidebar Tab (for windowed mode)
-  const [activeTab, setActiveTab] = useState<"dashboard" | "schedule" | "class" | "driver" | "settings" | "support">("dashboard");
+  // Active Sidebar Tab (synced with TopNavbar when provided)
+  const [internalTab, setInternalTab] = useState<"dashboard" | "schedule" | "class" | "driver" | "settings" | "support">("dashboard");
+  const activeTab = (externalTab as typeof internalTab) || internalTab;
+  const setActiveTab = (tab: typeof internalTab) => {
+    setInternalTab(tab);
+    onTabChange?.(tab);
+  };
 
   // User Profile
   const [storedUser] = useState(() => {
@@ -184,7 +193,7 @@ export default function DesktopDashboard({
   // =========================================================================
   if (isFullscreen) {
     return (
-      <div className={`w-full max-w-[1400px] mx-auto px-3 sm:px-6 py-4 select-none font-sans transition-colors duration-300 ${
+      <div className={`w-full max-w-[1800px] mx-auto px-3 sm:px-5 lg:px-6 py-4 select-none font-sans transition-colors duration-300 ${
         theme === "light" ? "text-slate-900" : "text-white"
       }`}>
         <div className={`relative w-full h-[calc(100vh-110px)] min-h-[540px] max-h-[820px] rounded-2xl overflow-hidden shadow-2xl border transition-colors ${
@@ -618,7 +627,7 @@ export default function DesktopDashboard({
   // Matching 2. Desktop Dashboard 1.1 - Dark (1).png (Supports Light & Dark)
   // =========================================================================
   return (
-    <div className={`w-full max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-5 select-none font-sans transition-colors duration-300 ${
+    <div className={`w-full max-w-[1800px] mx-auto px-3 sm:px-5 lg:px-6 py-4 select-none font-sans transition-colors duration-300 ${
       theme === "light" ? "text-slate-900" : "text-white"
     }`}>
       
@@ -630,7 +639,7 @@ export default function DesktopDashboard({
       }`}>
         
         {/* --- Left Sidebar (Icon on Tablet md:, Full on Desktop lg:) --- */}
-        <aside className={`w-16 md:w-20 lg:w-60 border-r p-3 md:p-3.5 lg:p-4 flex flex-col justify-between shrink-0 transition-all ${
+        <aside className={`w-16 md:w-20 lg:w-52 border-r p-3 md:p-3.5 lg:p-4 flex flex-col justify-between shrink-0 transition-all ${
           theme === "light"
             ? "bg-slate-50 border-slate-200"
             : "bg-[#161916] border-[#262a25]"
@@ -943,11 +952,11 @@ export default function DesktopDashboard({
                 </div>
               </div>
 
-              {/* Grid: Map on Left (8 cols), Travel Info Panel on Right (4 cols) */}
+              {/* Grid: Map on Left (8/9 cols), Travel Info Panel on Right (4/3 cols) */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                 
                 {/* Map Card */}
-                <div className={`lg:col-span-8 h-[420px] md:h-[480px] lg:h-[540px] rounded-xl overflow-hidden shadow-xl relative transition-all border ${
+                <div className={`lg:col-span-8 xl:col-span-9 h-[440px] md:h-[500px] lg:h-[580px] xl:h-[630px] rounded-xl overflow-hidden shadow-xl relative transition-all border ${
                   theme === "light"
                     ? "bg-slate-100 border-slate-200"
                     : "bg-[#121411] border-[#262a25]"
@@ -977,7 +986,7 @@ export default function DesktopDashboard({
                 </div>
 
                 {/* Right: Travel Information Form Panel */}
-                <div className={`lg:col-span-4 rounded-xl p-4 sm:p-5 shadow-xl space-y-3.5 border transition-all ${
+                <div className={`lg:col-span-4 xl:col-span-3 rounded-xl p-4 sm:p-5 shadow-xl space-y-3.5 border transition-all ${
                   theme === "light"
                     ? "bg-slate-50 border-slate-200 text-slate-900"
                     : "bg-[#161916] border-[#262a25] text-white"
