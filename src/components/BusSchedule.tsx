@@ -204,7 +204,7 @@ export default function BusSchedule({ theme: propTheme }: BusScheduleProps) {
       {drilldownRoute ? (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-200">
           {/* Go Back Header */}
-          <div className={`flex items-center justify-between pb-2 border-b ${
+          <div className={`flex items-center justify-between gap-2 pb-2 border-b ${
             isLight ? "border-slate-200" : "border-white/10"
           }`}>
             <button
@@ -212,12 +212,12 @@ export default function BusSchedule({ theme: propTheme }: BusScheduleProps) {
                 setDrilldownRoute(null);
                 setSelectedRouteFilter("Show All");
               }}
-              className="flex items-center gap-1.5 text-xs font-black text-amber-500 hover:text-amber-600 transition-colors uppercase tracking-wider active:scale-95"
+              className="flex items-center gap-1.5 text-xs font-black text-amber-500 hover:text-amber-600 transition-colors uppercase tracking-wider active:scale-95 shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Go Back</span>
             </button>
-            <span className={`text-xs font-black uppercase tracking-wide ${
+            <span className={`text-xs font-black uppercase tracking-wide truncate max-w-[60%] text-right ${
               isLight ? "text-slate-800" : "text-white"
             }`}>
               {drilldownRoute.route_name}
@@ -229,13 +229,13 @@ export default function BusSchedule({ theme: propTheme }: BusScheduleProps) {
             {currentStationsList.map((st, i) => (
               <div
                 key={i}
-                className={`rounded-xl p-3 sm:p-3.5 flex items-center justify-between gap-3 shadow-md transition-all group border ${
+                className={`rounded-xl p-2.5 sm:p-3.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sm:gap-3 shadow-md transition-all group border ${
                   isLight
                     ? "bg-white border-slate-200 hover:border-slate-300 shadow-slate-900/5"
                     : "bg-[#161916] border-[#262a25] hover:border-[#3d453a]"
                 }`}
               >
-                <div className="flex items-center gap-2.5 truncate">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                   <div className="w-2.5 h-2.5 rounded-full bg-[#facc15] shrink-0 shadow-sm" />
                   <p className={`text-xs sm:text-sm font-black transition-colors truncate ${
                     isLight ? "text-slate-900 group-hover:text-amber-600" : "text-white group-hover:text-[#facc15]"
@@ -244,8 +244,8 @@ export default function BusSchedule({ theme: propTheme }: BusScheduleProps) {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 shrink-0">
-                  <div className={`flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg border ${
+                <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+                  <div className={`flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-1 rounded-lg border ${
                     isLight
                       ? "bg-slate-100 text-slate-700 border-slate-200"
                       : "bg-[#1b1e1a] text-slate-300 border-[#2f352d]"
@@ -253,7 +253,7 @@ export default function BusSchedule({ theme: propTheme }: BusScheduleProps) {
                     <Clock className="w-3 h-3 text-[#facc15]" />
                     <span>{st.time}</span>
                   </div>
-                  <div className="text-[11px] font-black text-black bg-[#facc15] px-2.5 py-1 rounded-lg shadow-sm">
+                  <div className="text-[10px] sm:text-[11px] font-black text-black bg-[#facc15] px-2 sm:px-2.5 py-1 rounded-lg shadow-sm whitespace-nowrap">
                     {st.bus}
                   </div>
                 </div>

@@ -377,7 +377,7 @@ export default function App() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-8 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 text-xs">
                     <div>
                       <h6 className={`font-black uppercase text-[10px] tracking-wider mb-2 ${
                         appTheme === "light" ? "text-slate-900" : "text-white"
@@ -422,7 +422,7 @@ export default function App() {
                 <div className={`pt-5 flex items-center justify-between text-xs border-t ${
                   appTheme === "light" ? "border-slate-200 text-slate-500" : "border-[#242823] text-slate-500"
                 }`}>
-                  <p>Copyright 2024. All right reserved</p>
+                  <p>Copyright 2026. All rights reserved</p>
                   <div className="flex items-center gap-4 text-slate-400">
                     <span className="hover:text-[#facc15] cursor-pointer">Facebook</span>
                     <span className="hover:text-[#facc15] cursor-pointer">LinkedIn</span>
@@ -435,7 +435,7 @@ export default function App() {
             {/* ========================================================
                 B. MOBILE VIEWPORT (md:hidden) -> Matching Android Fullscreen Figma
                ======================================================== */}
-            <div className="flex md:hidden flex-col flex-1 h-[calc(100vh-53px)] overflow-hidden">
+            <div className="flex md:hidden flex-col flex-1 h-[calc(100dvh-53px)] overflow-hidden">
               {activeTab === "dashboard" && (
                 <div className="relative h-full w-full overflow-hidden">
                   <div className="absolute inset-0 z-0">
@@ -443,6 +443,7 @@ export default function App() {
                       navigationRoute={navigationRoute}
                       userCoords={userCoords}
                       selectedBusNo={selectedBusNo}
+                      theme={appTheme}
                       onMapClick={handleMapClick}
                       onSelectBus={handleSelectBus}
                       onSelectStop={handleSelectStop}
@@ -455,6 +456,7 @@ export default function App() {
                       <LocationSearchBar
                         currentStopName={startPoint}
                         isLoading={isLoadingRoute}
+                        theme={appTheme}
                         onSelectStopName={(stopName, isDest) => {
                           if (isDest) setDestination(stopName);
                           else setStartPoint(stopName);
@@ -465,7 +467,7 @@ export default function App() {
                   )}
 
                   {/* Floating Action Buttons: Fullscreen, Notice Board & Details Toggle */}
-                  <div className="absolute top-20 right-3 z-20 flex flex-col gap-2">
+                  <div className={`absolute ${isMobileFullscreenMap ? "top-3" : "top-[74px]"} right-3 z-20 flex flex-col gap-2 transition-all`}>
                     {/* Fullscreen Map Toggle Button */}
                     <button
                       onClick={() => setIsMobileFullscreenMap(!isMobileFullscreenMap)}
@@ -500,9 +502,10 @@ export default function App() {
 
                   {/* Bottom Floating Card (hidden in mobile fullscreen mode) */}
                   {!isMobileFullscreenMap && (
-                    <div className="absolute bottom-4 left-3 right-3 z-20 pointer-events-auto">
+                    <div className="absolute bottom-3 left-3 right-3 z-20 pointer-events-auto">
                       <BottomBusCard
                         data={bottomBusData}
+                        theme={appTheme}
                         onSelectBus={() => setSelectedBusNo(bottomBusData.busNo)}
                       />
                     </div>

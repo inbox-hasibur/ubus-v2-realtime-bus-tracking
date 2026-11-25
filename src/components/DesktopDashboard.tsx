@@ -100,8 +100,21 @@ export default function DesktopDashboard({
     return "Manjur Matin";
   });
 
-  const currentTime = "9:51 AM";
-  const currentDate = "9 SEP, 2024";
+  const [now, setNow] = useState<Date>(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentTime = now.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  const currentDate = now
+    .toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+    .toUpperCase();
 
   const userInitials = storedUser
     .split(" ")
@@ -174,7 +187,7 @@ export default function DesktopDashboard({
       <div className={`w-full max-w-[1400px] mx-auto px-3 sm:px-6 py-4 select-none font-sans transition-colors duration-300 ${
         theme === "light" ? "text-slate-900" : "text-white"
       }`}>
-        <div className={`relative w-full h-[760px] rounded-2xl overflow-hidden shadow-2xl border transition-colors ${
+        <div className={`relative w-full h-[calc(100vh-110px)] min-h-[540px] max-h-[820px] rounded-2xl overflow-hidden shadow-2xl border transition-colors ${
           theme === "light"
             ? "bg-slate-100 border-slate-300"
             : "bg-[#141613] border-[#262a25]"
@@ -365,7 +378,7 @@ export default function DesktopDashboard({
               RIGHT SIDE OVERLAY CARD: Floating Navigation Panel
               Matching Figma Dark (Fullscreen) & White (Fullscreen)
              ------------------------------------------------------------- */}
-          <div className={`absolute top-16 right-4 z-20 w-80 lg:w-[340px] rounded-2xl p-4 shadow-2xl space-y-3 backdrop-blur-xl border transition-all ${
+          <div className={`absolute top-16 right-4 z-20 w-80 lg:w-[340px] max-h-[calc(100%-84px)] overflow-y-auto custom-scrollbar rounded-2xl p-4 shadow-2xl space-y-3 backdrop-blur-xl border transition-all ${
             theme === "light"
               ? "bg-white/95 border-slate-200/90 text-slate-900 shadow-slate-900/10"
               : "bg-[#161916]/90 border-[#262a25] text-white shadow-black/50"
@@ -610,7 +623,7 @@ export default function DesktopDashboard({
     }`}>
       
       {/* Main Dashboard Container Frame */}
-      <div className={`border rounded-2xl overflow-hidden shadow-2xl flex min-h-[700px] transition-colors duration-300 ${
+      <div className={`border rounded-2xl overflow-hidden shadow-2xl flex min-h-[600px] lg:min-h-[680px] transition-colors duration-300 ${
         theme === "light"
           ? "bg-white border-slate-200"
           : "bg-[#141613] border-[#262a25]"

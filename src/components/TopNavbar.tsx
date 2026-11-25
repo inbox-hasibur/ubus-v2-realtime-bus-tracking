@@ -60,8 +60,21 @@ export default function TopNavbar({
     }
     return null;
   });
-  const currentTime = "09:51 AM";
-  const currentDate = "09 SEP, 2024";
+  const [now, setNow] = useState<Date>(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentTime = now.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  const currentDate = now
+    .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+    .toUpperCase();
 
   const handleNav = (tab: string) => {
     setActiveTab(tab);
@@ -214,7 +227,7 @@ export default function TopNavbar({
         </div>
 
         {/* Right Section: Status Badges, Profile & Auth Triggers */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           {/* Mobile Quick Map Button */}
           <button
             onClick={() => {
@@ -226,6 +239,20 @@ export default function TopNavbar({
             <Bus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>MAP</span>
           </button>
+
+          {/* Compact Mobile Auth Trigger when logged out */}
+          {!currentUser && (
+            <button
+              onClick={() => onOpenAuth?.("login")}
+              className={`sm:hidden text-[11px] font-bold px-2 py-1.5 rounded-xl border transition-colors ${
+                isLight
+                  ? "border-slate-300 text-slate-700 hover:text-black bg-slate-100"
+                  : "border-[#262a25] text-slate-200 hover:text-white bg-[#171a16]"
+              }`}
+            >
+              Sign in
+            </button>
+          )}
 
           {/* Desktop Status Indicators */}
           <div className="hidden lg:flex items-center gap-2">
@@ -319,19 +346,29 @@ export default function TopNavbar({
         </div>
       </header>
 
-      {/* --- Exact Mobile Drawer from Frame 69.png (Reduced Roundness: rounded-2xl) --- */}
+      {/* --- Mobile Drawer (Theme-aware) --- */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-start pt-3 px-4 animate-in fade-in duration-200">
-          
-          <div className="w-full max-w-sm bg-[#161916] border border-[#262a25] rounded-2xl p-4 shadow-2xl flex flex-col space-y-3 relative text-white">
-            
+        <div
+          onClick={() => setIsMenuOpen(false)}
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex flex-col items-center justify-start pt-3 px-4 animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`w-full max-w-sm border rounded-2xl p-4 shadow-2xl flex flex-col space-y-3 relative ${
+              isLight
+                ? "bg-white border-slate-200 text-slate-900"
+                : "bg-[#161916] border-[#262a25] text-white"
+            }`}
+          >
             {/* Top Bar of Drawer */}
-            <div className="flex items-center justify-between pb-2 border-b border-[#242823] px-1">
+            <div className={`flex items-center justify-between pb-2 border-b px-1 ${
+              isLight ? "border-slate-200" : "border-[#242823]"
+            }`}>
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-lg bg-[#facc15] flex items-center justify-center text-black">
                   <Bus className="w-3.5 h-3.5" />
                 </div>
-                <span className="font-black text-sm text-white">UBus</span>
+                <span className={`font-black text-sm ${isLight ? "text-slate-900" : "text-white"}`}>UBus</span>
               </div>
 
               <span className="text-xs font-bold text-slate-400">navigation</span>
@@ -340,7 +377,7 @@ export default function TopNavbar({
                 {currentUser ? (
                   <button
                     onClick={handleSignOut}
-                    className="text-xs font-bold text-[#facc15] hover:underline"
+                    className={`text-xs font-bold hover:underline ${isLight ? "text-amber-600" : "text-[#facc15]"}`}
                   >
                     Log Out
                   </button>
@@ -351,7 +388,7 @@ export default function TopNavbar({
                         setIsMenuOpen(false);
                         onOpenAuth?.("login");
                       }}
-                      className="text-xs font-bold text-slate-300 hover:text-white"
+                      className={`text-xs font-bold ${isLight ? "text-slate-600 hover:text-slate-900" : "text-slate-300 hover:text-white"}`}
                     >
                       Sign in
                     </button>
@@ -369,37 +406,55 @@ export default function TopNavbar({
               </div>
             </div>
 
-            {/* Big Main Buttons (Matching Frame 69.png) */}
+            {/* Big Main Buttons */}
             <div className="space-y-2">
               <button
                 onClick={() => handleNav("dashboard")}
-                className="w-full py-2.5 bg-[#1d211c] hover:bg-[#252a23] border border-[#2f352d] rounded-xl text-xs font-black tracking-widest text-slate-100 uppercase transition-colors"
+                className={`w-full py-2.5 border rounded-xl text-xs font-black tracking-widest uppercase transition-colors ${
+                  isLight
+                    ? "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-900"
+                    : "bg-[#1d211c] hover:bg-[#252a23] border-[#2f352d] text-slate-100"
+                }`}
               >
                 LIVE MAP
               </button>
               <button
                 onClick={() => handleNav("schedule")}
-                className="w-full py-2.5 bg-[#1d211c] hover:bg-[#252a23] border border-[#2f352d] rounded-xl text-xs font-black tracking-widest text-slate-100 uppercase transition-colors"
+                className={`w-full py-2.5 border rounded-xl text-xs font-black tracking-widest uppercase transition-colors ${
+                  isLight
+                    ? "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-900"
+                    : "bg-[#1d211c] hover:bg-[#252a23] border-[#2f352d] text-slate-100"
+                }`}
               >
                 BUS SCHEDULE
               </button>
               <button
                 onClick={() => handleNav("class")}
-                className="w-full py-2.5 bg-[#1d211c] hover:bg-[#252a23] border border-[#2f352d] rounded-xl text-xs font-black tracking-widest text-slate-100 uppercase transition-colors"
+                className={`w-full py-2.5 border rounded-xl text-xs font-black tracking-widest uppercase transition-colors ${
+                  isLight
+                    ? "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-900"
+                    : "bg-[#1d211c] hover:bg-[#252a23] border-[#2f352d] text-slate-100"
+                }`}
               >
                 CLASS SCHEDULE
               </button>
               <button
                 onClick={() => handleNav("about")}
-                className="w-full py-2.5 bg-[#1d211c] hover:bg-[#252a23] border border-[#2f352d] rounded-xl text-xs font-black tracking-widest text-slate-100 uppercase transition-colors"
+                className={`w-full py-2.5 border rounded-xl text-xs font-black tracking-widest uppercase transition-colors ${
+                  isLight
+                    ? "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-900"
+                    : "bg-[#1d211c] hover:bg-[#252a23] border-[#2f352d] text-slate-100"
+                }`}
               >
                 ABOUT & TEAM
               </button>
             </div>
 
-            {/* Feature Menu Sub-block (Frame 69.png) */}
-            <div className="bg-[#121411] border border-[#262a25] rounded-xl p-3 text-center space-y-2">
-              <p className="text-xs font-black tracking-wider text-white">Feature Menu</p>
+            {/* Feature Menu Sub-block */}
+            <div className={`border rounded-xl p-3 text-center space-y-2 ${
+              isLight ? "bg-slate-50 border-slate-200" : "bg-[#121411] border-[#262a25]"
+            }`}>
+              <p className={`text-xs font-black tracking-wider ${isLight ? "text-slate-900" : "text-white"}`}>Feature Menu</p>
               <div className="w-8 h-0.5 bg-[#facc15] mx-auto rounded-full mb-2" />
 
               <div className="space-y-1.5 text-xs font-bold">
@@ -409,7 +464,9 @@ export default function TopNavbar({
                     if (onOpenDriver) onOpenDriver();
                     else handleNav("driver");
                   }}
-                  className="w-full py-1 text-amber-400 hover:text-amber-300 flex items-center justify-center gap-1.5"
+                  className={`w-full py-1 flex items-center justify-center gap-1.5 ${
+                    isLight ? "text-amber-600 hover:text-amber-700" : "text-amber-400 hover:text-amber-300"
+                  }`}
                 >
                   <Bus className="w-3.5 h-3.5" />
                   <span>Driver Companion App</span>
@@ -419,7 +476,9 @@ export default function TopNavbar({
                     setIsMenuOpen(false);
                     onOpenNotices?.();
                   }}
-                  className="w-full py-1 text-slate-300 hover:text-white flex items-center justify-center gap-1.5"
+                  className={`w-full py-1 flex items-center justify-center gap-1.5 ${
+                    isLight ? "text-slate-700 hover:text-black" : "text-slate-300 hover:text-white"
+                  }`}
                 >
                   <Bell className="w-3.5 h-3.5 text-[#facc15]" />
                   <span>Notices & Alerts</span>
@@ -429,15 +488,19 @@ export default function TopNavbar({
                     toggleTheme();
                     setIsMenuOpen(false);
                   }}
-                  className="w-full py-1 text-slate-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors"
+                  className={`w-full py-1 flex items-center justify-center gap-1.5 transition-colors ${
+                    isLight ? "text-slate-700 hover:text-black" : "text-slate-300 hover:text-white"
+                  }`}
                 >
-                  {isLight ? <Moon className="w-3.5 h-3.5 text-indigo-400" /> : <Sun className="w-3.5 h-3.5 text-[#facc15]" />}
+                  {isLight ? <Moon className="w-3.5 h-3.5 text-indigo-500" /> : <Sun className="w-3.5 h-3.5 text-[#facc15]" />}
                   <span>{isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}</span>
                 </button>
                 <button
                   onClick={() => handleNav("settings")}
                   className={`w-full py-1 transition-colors ${
-                    activeTab === "settings" ? "text-[#facc15] font-black" : "text-slate-300 hover:text-white"
+                    activeTab === "settings"
+                      ? isLight ? "text-amber-600 font-black" : "text-[#facc15] font-black"
+                      : isLight ? "text-slate-700 hover:text-black" : "text-slate-300 hover:text-white"
                   }`}
                 >
                   Settings & Preferences
@@ -448,11 +511,14 @@ export default function TopNavbar({
             {/* Bottom Circular Chevron ^ */}
             <div
               onClick={() => setIsMenuOpen(false)}
-              className="w-7 h-7 rounded-full bg-[#1b1e1a] border border-[#2f352d] flex items-center justify-center mx-auto cursor-pointer text-slate-300 hover:text-white hover:bg-[#252a23] transition-colors"
+              className={`w-7 h-7 rounded-full border flex items-center justify-center mx-auto cursor-pointer transition-colors ${
+                isLight
+                  ? "bg-slate-100 border-slate-300 text-slate-600 hover:text-black hover:bg-slate-200"
+                  : "bg-[#1b1e1a] border-[#2f352d] text-slate-300 hover:text-white hover:bg-[#252a23]"
+              }`}
             >
               <ChevronUp className="w-4 h-4" />
             </div>
-
           </div>
         </div>
       )}

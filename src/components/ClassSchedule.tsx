@@ -146,26 +146,26 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
               }`}
             >
               {/* Left: Time Badge */}
-              <div className={`flex items-center gap-2 rounded-lg px-2.5 sm:px-3 py-2 shrink-0 border ${
+              <div className={`flex items-center gap-1.5 sm:gap-2 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 shrink-0 border ${
                 isLight
                   ? "bg-slate-100 border-slate-200 text-slate-900"
                   : "bg-[#1b1e1a] border-[#262a25] text-slate-100"
               }`}>
-                <Clock className="w-3.5 h-3.5 text-yellow-500" />
-                <span className="text-xs sm:text-sm font-black whitespace-nowrap">
+                <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-500 shrink-0" />
+                <span className="text-[11px] sm:text-sm font-black whitespace-nowrap">
                   {cls.time}
                 </span>
               </div>
 
               {/* Middle: Course Code & Title */}
               <div className="flex-1 min-w-0 px-1 sm:px-2">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1">
                   <span className={`text-xs sm:text-sm font-black tracking-tight shrink-0 ${
                     isLight ? "text-slate-900" : "text-white"
                   }`}>
                     {cls.code}
                   </span>
-                  <span className={`text-xs font-semibold truncate ${
+                  <span className={`text-[11px] sm:text-xs font-semibold truncate ${
                     isLight ? "text-slate-600" : "text-slate-300"
                   }`}>
                     {cls.title}
@@ -176,17 +176,17 @@ export default function ClassSchedule({ theme: propTheme }: ClassScheduleProps) 
               {/* Right: Status Pill (Missed / 0h 3m / Next) */}
               <div className="shrink-0">
                 {cls.status === "missed" && (
-                  <span className="inline-block text-center text-xs font-black text-red-500 bg-red-500/10 border border-red-500/30 px-3 py-1 rounded-lg min-w-[70px]">
+                  <span className="inline-block text-center text-[11px] sm:text-xs font-black text-red-500 bg-red-500/10 border border-red-500/30 px-2 sm:px-3 py-1 rounded-lg min-w-[56px] sm:min-w-[70px]">
                     Missed
                   </span>
                 )}
                 {cls.status === "active" && (
-                  <span className="inline-block text-center text-xs font-black text-amber-500 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-lg min-w-[70px] animate-pulse">
+                  <span className="inline-block text-center text-[11px] sm:text-xs font-black text-amber-500 bg-amber-500/10 border border-amber-500/30 px-2 sm:px-3 py-1 rounded-lg min-w-[56px] sm:min-w-[70px] animate-pulse">
                     {cls.countdown || "0h 3m"}
                   </span>
                 )}
                 {cls.status === "next" && (
-                  <span className="inline-block text-center text-xs font-black text-emerald-500 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-lg min-w-[70px]">
+                  <span className="inline-block text-center text-[11px] sm:text-xs font-black text-emerald-500 bg-emerald-500/10 border border-emerald-500/30 px-2 sm:px-3 py-1 rounded-lg min-w-[56px] sm:min-w-[70px]">
                     Next
                   </span>
                 )}
